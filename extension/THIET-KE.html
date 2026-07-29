@@ -1,0 +1,1810 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MeetCap — Thiết kế giao diện tiện ích</title>
+<style>
+  :root {
+    --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, "Helvetica Neue", Arial, sans-serif;
+    --display: "Bahnschrift", "DIN Alternate", "Segoe UI Semibold", var(--sans);
+    --mono: "Cascadia Mono", ui-monospace, "SF Mono", Consolas, "Liberation Mono", monospace;
+
+    --bg: #eceeed;
+    --surface: #ffffff;
+    --surface-2: #f4f6f5;
+    --surface-3: #e6eae8;
+    --line: #d4dad8;
+    --line-soft: #e2e7e5;
+    --text: #14181a;
+    --text-2: #566360;
+    --text-3: #8a938f;
+
+    --amber: #b3771a;
+    --amber-bright: #e8a33d;
+    --amber-wash: #f7ecd9;
+    --teal: #157a70;
+    --teal-bright: #35b3a5;
+    --teal-wash: #dcefec;
+    --red: #c22a2f;
+    --red-bright: #e0464b;
+    --red-wash: #f7e2e2;
+
+    --shadow: 0 1px 2px rgba(16,24,22,.06), 0 8px 24px -12px rgba(16,24,22,.22);
+
+    --r-sm: 5px;
+    --r-md: 8px;
+    --r-lg: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1113;
+      --surface: #16191b;
+      --surface-2: #1c2124;
+      --surface-3: #232a2d;
+      --line: #2b3235;
+      --line-soft: #21272a;
+      --text: #e7ebe9;
+      --text-2: #9ba4a1;
+      --text-3: #6c7673;
+
+      --amber: #e8a33d;
+      --amber-bright: #f0b559;
+      --amber-wash: #2a2216;
+      --teal: #35b3a5;
+      --teal-bright: #4fc9bb;
+      --teal-wash: #142826;
+      --red: #e0464b;
+      --red-bright: #ec6165;
+      --red-wash: #2b1719;
+
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+    }
+  }
+
+  :root[data-theme="light"] {
+    --bg: #eceeed; --surface: #ffffff; --surface-2: #f4f6f5; --surface-3: #e6eae8;
+    --line: #d4dad8; --line-soft: #e2e7e5;
+    --text: #14181a; --text-2: #566360; --text-3: #8a938f;
+    --amber: #b3771a; --amber-bright: #e8a33d; --amber-wash: #f7ecd9;
+    --teal: #157a70; --teal-bright: #35b3a5; --teal-wash: #dcefec;
+    --red: #c22a2f; --red-bright: #e0464b; --red-wash: #f7e2e2;
+    --shadow: 0 1px 2px rgba(16,24,22,.06), 0 8px 24px -12px rgba(16,24,22,.22);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1113; --surface: #16191b; --surface-2: #1c2124; --surface-3: #232a2d;
+    --line: #2b3235; --line-soft: #21272a;
+    --text: #e7ebe9; --text-2: #9ba4a1; --text-3: #6c7673;
+    --amber: #e8a33d; --amber-bright: #f0b559; --amber-wash: #2a2216;
+    --teal: #35b3a5; --teal-bright: #4fc9bb; --teal-wash: #142826;
+    --red: #e0464b; --red-bright: #ec6165; --red-wash: #2b1719;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 400 15px/1.6 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px 120px;
+  }
+
+  /* ---------- typography ---------- */
+  h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; letter-spacing: .01em; }
+  h1 { font-size: clamp(34px, 5.2vw, 54px); line-height: 1.06; }
+  h2 { font-size: clamp(23px, 3vw, 30px); line-height: 1.15; }
+  h3 { font-size: 17px; line-height: 1.3; }
+  p { margin: 0; }
+
+  .eyebrow {
+    font: 600 11px/1 var(--mono);
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .lede { font-size: 17px; color: var(--text-2); max-width: 62ch; }
+  .note { font-size: 13.5px; color: var(--text-2); max-width: 68ch; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  code {
+    font: 500 12.5px/1.45 var(--mono);
+    background: var(--surface-2);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--text);
+    word-break: break-word;
+  }
+
+  /* ---------- header ---------- */
+  .masthead {
+    border-bottom: 1px solid var(--line);
+    padding: 56px 0 34px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .brandline { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .reclamp {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--red-bright);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--red-bright) 18%, transparent);
+    flex: none;
+  }
+  .masthead .lede { font-size: 18px; }
+  .metastrip {
+    display: flex; flex-wrap: wrap; gap: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: var(--surface);
+    margin-top: 6px;
+  }
+  .metastrip > div {
+    flex: 1 1 150px;
+    padding: 11px 14px;
+    border-right: 1px solid var(--line-soft);
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .metastrip > div:last-child { border-right: 0; }
+  .metastrip b { font: 600 15px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
+  .metastrip span { font: 500 10.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+
+  /* ---------- sections ---------- */
+  section { padding-top: 68px; }
+  .sechead { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+  .sechead .num {
+    font: 600 11px/1 var(--mono); letter-spacing: .14em;
+    color: var(--amber); text-transform: uppercase;
+  }
+  .sechead h2 + p { margin-top: 2px; }
+
+  /* ---------- principle cards ---------- */
+  .cards { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 16px 17px;
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .card h3 { font-size: 15.5px; }
+  .card p { font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+
+  /* ---------- state machine ---------- */
+  .flow { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(186px, 1fr)); }
+  .fstate {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--line);
+    border-radius: var(--r-sm);
+    padding: 13px 14px 14px;
+    display: flex; flex-direction: column; gap: 9px;
+    position: relative;
+  }
+  .fstate[data-tone="idle"] { border-top-color: var(--text-3); }
+  .fstate[data-tone="wait"] { border-top-color: var(--teal-bright); }
+  .fstate[data-tone="live"] { border-top-color: var(--red-bright); background: color-mix(in srgb, var(--red-bright) 5%, var(--surface)); }
+  .fstate[data-tone="done"] { border-top-color: var(--amber-bright); }
+  .fstate .fname { font: 600 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+  .fstate .fcond { font: 500 11.5px/1.5 var(--mono); color: var(--text-2); }
+  .fstate .fdo { font-size: 12.5px; line-height: 1.5; color: var(--text-2); border-top: 1px dashed var(--line); padding-top: 8px; }
+  .fstate .fdo b { color: var(--text); font-weight: 600; }
+
+  /* ---------- tables ---------- */
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  thead th {
+    font: 600 10.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    color: var(--text-3); background: var(--surface-2); white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.k { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; color: var(--text); }
+  td.m { font-family: var(--mono); font-size: 12.5px; color: var(--text-2); }
+
+  /* ---------- stage: fake Meet ---------- */
+  .stage {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    min-height: 380px;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: radial-gradient(120% 100% at 50% 0%, #1a1e21 0%, #0b0d0e 70%);
+    border: 1px solid var(--line);
+  }
+  .stage-slide {
+    position: absolute; inset: 7% 20% 17% 7%;
+    background: #f6f5f1;
+    border-radius: 4px;
+    padding: 5% 5.5%;
+    display: flex; flex-direction: column; gap: 5%;
+  }
+  .slide-title { height: 12px; width: 46%; background: #23272b; border-radius: 2px; }
+  .slide-sub { height: 7px; width: 62%; background: #b9bec2; border-radius: 2px; }
+  .slide-chart { flex: 1; display: flex; align-items: flex-end; gap: 3%; padding-top: 4%; border-bottom: 1px solid #cfd3d6; }
+  .slide-chart i { display: block; flex: 1; background: #7d8b96; border-radius: 2px 2px 0 0; }
+  .slide-chart i:nth-child(3) { background: #d08a2c; }
+  .stage-tiles { position: absolute; top: 6%; right: 3%; display: flex; flex-direction: column; gap: 10px; width: 13%; }
+  .stage-tiles div {
+    aspect-ratio: 4/3; border-radius: 6px; background: #24292c;
+    display: grid; place-items: center;
+    font: 600 13px/1 var(--display); color: #9aa3a7;
+  }
+  .stage-bar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 58px;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    background: linear-gradient(to top, rgba(8,10,11,.96), rgba(8,10,11,0));
+  }
+  .stage-bar .cbtn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,.12);
+    display: grid; place-items: center;
+    font: 500 12px/1 var(--mono); color: #dfe3e5;
+  }
+  .stage-bar .cbtn.on { background: var(--teal-bright); color: #07110f; }
+  .stage-bar .hang { width: 52px; border-radius: 17px; background: #d93025; color: #fff; }
+  .stage-code {
+    position: absolute; left: 16px; bottom: 20px;
+    font: 500 12px/1 var(--mono); color: rgba(255,255,255,.6);
+  }
+  .stage-cc {
+    position: absolute; left: 18%; right: 18%; bottom: 72px;
+    display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
+  }
+  .stage-cc p {
+    background: rgba(0,0,0,.72); color: #f1f3f4;
+    font-size: 13px; line-height: 1.35;
+    padding: 5px 10px; border-radius: 4px;
+  }
+  .stage-cc p b { color: #9aa0a6; font-weight: 500; margin-right: 7px; }
+
+  /* ---------- HUD ---------- */
+  .hud-anchor { position: absolute; left: 16px; bottom: 76px; }
+  .hud {
+    font: 500 12px/1.35 var(--sans);
+    color: #e9edea;
+    background: rgba(18,22,24,.93);
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 10px;
+    box-shadow: 0 6px 26px rgba(0,0,0,.5);
+    backdrop-filter: blur(10px);
+    user-select: none;
+    overflow: hidden;
+  }
+  .hud-pill { display: flex; align-items: center; gap: 9px; padding: 7px 10px; }
+  .hud-grip { width: 3px; height: 15px; border-radius: 2px; background: rgba(255,255,255,.2); flex: none; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--red-bright); }
+  .dot.blink { animation: pulse 1.6s ease-in-out infinite; }
+  .dot.grey { background: #8a9390; }
+  .dot.amber { background: var(--amber-bright); }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .32 } }
+  @media (prefers-reduced-motion: reduce) { .dot.blink { animation: none } }
+  .hud-stat { font: 500 12px/1 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .hud-stat s { text-decoration: none; color: rgba(233,237,234,.4); margin: 0 5px; }
+  .hud-chev { color: rgba(233,237,234,.5); font: 500 11px/1 var(--mono); padding-left: 2px; }
+
+  .hud-panel { width: 322px; }
+  .hud-head {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 11px; border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .hud-head .name { font: 600 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: rgba(233,237,234,.55); }
+  .hud-head .spacer { flex: 1; }
+  .hud-body { padding: 11px; display: flex; flex-direction: column; gap: 11px; }
+  .hud-nums { display: flex; gap: 0; }
+  .hud-num { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .hud-num b { font: 600 19px/1 var(--mono); font-variant-numeric: tabular-nums; }
+  .hud-num b.teal { color: var(--teal-bright); }
+  .hud-num span { font: 500 9.5px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; color: rgba(233,237,234,.45); }
+
+  /* delta meter */
+  .meter { display: flex; flex-direction: column; gap: 5px; }
+  .meter-top { display: flex; justify-content: space-between; align-items: baseline; }
+  .meter-top span { font: 500 9.5px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; color: rgba(233,237,234,.45); }
+  .meter-top b { font: 600 11.5px/1 var(--mono); font-variant-numeric: tabular-nums; }
+  .meter-track {
+    position: relative; height: 7px; border-radius: 2px;
+    background: rgba(255,255,255,.09);
+    overflow: visible;
+  }
+  .meter-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: var(--teal-bright); }
+  .meter-fill.hot { background: var(--amber-bright); }
+  .meter-thresh { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber-bright); }
+  .meter-thresh::after {
+    content: attr(data-label);
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    font: 500 9px/1 var(--mono); color: var(--amber-bright); white-space: nowrap;
+  }
+  .meter-ticks { display: flex; justify-content: space-between; padding-top: 13px; }
+  .meter-ticks i { font: 500 9px/1 var(--mono); font-style: normal; color: rgba(233,237,234,.3); }
+
+  .hud-live {
+    font-size: 11.5px; line-height: 1.45; color: rgba(233,237,234,.72);
+    border-left: 2px solid var(--teal-bright); padding-left: 8px;
+  }
+  .hud-live b { color: rgba(233,237,234,.95); font-weight: 600; }
+  .hud-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .hbtn {
+    font: 500 11.5px/1 var(--sans); color: #e9edea;
+    background: rgba(255,255,255,.1); border: 0; border-radius: 6px;
+    padding: 7px 9px; cursor: default; white-space: nowrap;
+  }
+  .hbtn.primary { background: var(--amber-bright); color: #1a1207; font-weight: 600; }
+  .hbtn.ghost { background: transparent; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+  .hbtn.icon { padding: 6px 8px; font-family: var(--mono); }
+  .hud-foot {
+    padding: 8px 11px; border-top: 1px solid rgba(255,255,255,.08);
+    font: 500 10.5px/1.4 var(--mono); color: rgba(233,237,234,.45);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .hud-foot .ok { color: var(--teal-bright); }
+
+  /* toast */
+  .toast {
+    display: flex; align-items: flex-start; gap: 9px;
+    width: 300px; padding: 10px 11px;
+    background: rgba(18,22,24,.95);
+    border: 1px solid rgba(255,255,255,.11);
+    border-left: 3px solid var(--teal-bright);
+    border-radius: 8px;
+    color: #e9edea; font-size: 12.5px; line-height: 1.45;
+    box-shadow: 0 6px 26px rgba(0,0,0,.5);
+  }
+  .toast.warn { border-left-color: var(--amber-bright); }
+  .toast.bad { border-left-color: var(--red-bright); }
+  .toast b { display: block; font-weight: 600; margin-bottom: 2px; }
+  .toast .tact { color: var(--amber-bright); font-weight: 600; margin-top: 5px; display: inline-block; }
+  .toast-stack { display: flex; flex-direction: column; gap: 8px; }
+
+  /* stage tabs */
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tab {
+    font: 500 12px/1 var(--sans);
+    background: var(--surface); color: var(--text-2);
+    border: 1px solid var(--line); border-radius: 100px;
+    padding: 7px 13px; cursor: pointer;
+  }
+  .tab:hover { border-color: var(--text-3); color: var(--text); }
+  .tab[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .tab:focus-visible { outline: 2px solid var(--amber-bright); outline-offset: 2px; }
+  .caption { font-size: 12.5px; color: var(--text-3); margin-top: 10px; font-family: var(--mono); }
+
+  /* ---------- popup filmstrip ---------- */
+  .strip {
+    display: flex; gap: 18px; align-items: flex-start;
+    overflow-x: auto; padding: 4px 4px 18px;
+  }
+  .shot { flex: none; width: 360px; display: flex; flex-direction: column; gap: 9px; }
+  .shot > figcaption {
+    font: 500 10.5px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .shot > figcaption b { color: var(--text); display: block; letter-spacing: .06em; font-size: 11px; }
+
+  .popup {
+    width: 360px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    font-size: 13px;
+  }
+  .p-head {
+    display: flex; align-items: center; gap: 9px;
+    padding: 12px 14px; border-bottom: 1px solid var(--line-soft);
+  }
+  .p-head .wordmark { font: 600 14px/1 var(--display); letter-spacing: .04em; }
+  .p-head .code { font: 500 11.5px/1 var(--mono); color: var(--text-3); }
+  .p-head .spacer { flex: 1; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font: 600 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    padding: 5px 8px; border-radius: 100px;
+    background: var(--surface-3); color: var(--text-2);
+  }
+  .pill.rec { background: var(--red-wash); color: var(--red); }
+  .pill.pause { background: var(--amber-wash); color: var(--amber); }
+  .pill.wait { background: var(--teal-wash); color: var(--teal); }
+  .p-body { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+
+  .tiles { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); border-radius: var(--r-sm); overflow: hidden; }
+  .tile { background: var(--surface); padding: 10px 11px; display: flex; flex-direction: column; gap: 4px; }
+  .tile b { font: 600 21px/1 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .tile b.teal { color: var(--teal); }
+  .tile span { font: 500 9.5px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; color: var(--text-3); }
+
+  .pmeter { display: flex; flex-direction: column; gap: 6px; }
+  .pmeter-top { display: flex; justify-content: space-between; align-items: baseline; }
+  .pmeter-top span { font: 500 9.5px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; color: var(--text-3); }
+  .pmeter-top b { font: 600 12px/1 var(--mono); font-variant-numeric: tabular-nums; }
+  .pmeter-track { position: relative; height: 8px; border-radius: 2px; background: var(--surface-3); }
+  .pmeter-fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--teal); }
+  .pmeter-thresh { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber-bright); }
+
+  .switches { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--line-soft); border-radius: var(--r-sm); }
+  .sw { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-bottom: 1px solid var(--line-soft); }
+  .sw:last-child { border-bottom: 0; }
+  .sw .swtext { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .sw .swtext b { font-weight: 600; font-size: 13px; }
+  .sw .swtext span { font-size: 11.5px; color: var(--text-3); line-height: 1.35; }
+  .knob { width: 34px; height: 20px; border-radius: 100px; background: var(--surface-3); position: relative; flex: none; }
+  .knob::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  .knob.on { background: var(--teal); }
+  .knob.on::after { left: 17px; background: #fff; }
+
+  .transcript { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line-soft); padding-top: 12px; }
+  .tline { display: flex; gap: 9px; align-items: flex-start; }
+  .tline .tt { font: 500 11px/1.5 var(--mono); color: var(--text-3); flex: none; }
+  .tline .tx { font-size: 12.5px; line-height: 1.45; color: var(--text-2); }
+  .tline .tx b { color: var(--text); font-weight: 600; }
+  .tframe {
+    display: flex; align-items: center; gap: 9px;
+    font: 500 11px/1 var(--mono); color: var(--teal);
+    background: var(--teal-wash); border-radius: 4px; padding: 6px 9px;
+  }
+
+  .btnrow { display: flex; gap: 7px; }
+  .btn {
+    font: 500 12.5px/1 var(--sans);
+    padding: 9px 12px; border-radius: var(--r-sm);
+    border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
+    cursor: default; white-space: nowrap; flex: 1; text-align: center;
+  }
+  .btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 600; }
+  .btn.amber { background: var(--amber-bright); color: #1a1207; border-color: var(--amber-bright); font-weight: 600; }
+  .btn.danger { color: var(--red); border-color: color-mix(in srgb, var(--red) 35%, var(--line)); background: transparent; }
+
+  .exportbar { display: flex; flex-direction: column; gap: 7px; border-top: 1px solid var(--line-soft); padding-top: 12px; }
+  .exportbar .lbl { font: 600 9.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    font: 500 11.5px/1 var(--mono);
+    padding: 7px 10px; border-radius: 100px;
+    border: 1px solid var(--line); background: var(--surface-2); color: var(--text-2);
+  }
+  .chip.on { border-color: var(--teal); color: var(--teal); background: var(--teal-wash); }
+
+  .p-foot {
+    padding: 10px 14px; border-top: 1px solid var(--line-soft);
+    display: flex; align-items: center; gap: 10px;
+    font: 500 11px/1 var(--mono); color: var(--text-3);
+  }
+  .p-foot .spacer { flex: 1; }
+  .p-foot a { color: var(--text-2); text-decoration: none; border-bottom: 1px solid var(--line); }
+
+  .empty { display: flex; flex-direction: column; gap: 11px; padding: 22px 6px 10px; align-items: flex-start; }
+  .empty .glyph {
+    width: 42px; height: 42px; border-radius: var(--r-sm);
+    border: 1px dashed var(--line); display: grid; place-items: center;
+    font: 500 15px/1 var(--mono); color: var(--text-3);
+  }
+  .empty h3 { font-size: 16px; }
+  .empty p { font-size: 12.5px; color: var(--text-2); line-height: 1.5; }
+
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+  .ck { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--text-2); }
+  .ck i { font-style: normal; font: 600 11px/1 var(--mono); color: var(--teal); flex: none; width: 14px; }
+  .ck i.off { color: var(--text-3); }
+
+  /* ---------- popup tabs + lịch sử ---------- */
+  .ptabs { display: flex; gap: 0; border-bottom: 1px solid var(--line-soft); padding: 0 14px; }
+  .ptab {
+    font: 500 12.5px/1 var(--sans); color: var(--text-3);
+    padding: 11px 2px; margin-right: 18px; cursor: default;
+    background: none; border: 0; border-bottom: 2px solid transparent;
+  }
+  .ptab.cur { color: var(--text); font-weight: 600; border-bottom-color: var(--amber-bright); }
+
+  .hist { display: flex; flex-direction: column; gap: 8px; }
+  .hhint {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    font: 500 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3);
+  }
+  .hhint .fmt {
+    text-transform: none; letter-spacing: 0; font-size: 11px;
+    border: 1px solid var(--line); border-radius: 100px; padding: 5px 9px; color: var(--text-2);
+  }
+  .hrow {
+    border: 1px solid var(--line); border-radius: var(--r-sm);
+    background: var(--surface-2); padding: 10px 11px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .hrow.live { border-color: color-mix(in srgb, var(--red) 38%, var(--line)); background: color-mix(in srgb, var(--red-bright) 6%, var(--surface-2)); }
+  .hrow.hot { border-color: var(--teal); background: var(--teal-wash); }
+  .hrow.dim { opacity: .45; }
+  .hrow .hmain { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .hrow .hcode { display: flex; align-items: center; gap: 7px; font: 600 11.5px/1 var(--mono); color: var(--text-2); }
+  .hrow .htitle { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hrow .hmeta { font: 500 11px/1.45 var(--mono); color: var(--text-3); }
+  .hrow .hacts { display: flex; gap: 4px; flex: none; }
+  .iconbtn {
+    width: 28px; height: 28px; border-radius: 5px;
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--text-2); font: 500 12px/1 var(--mono);
+    display: grid; place-items: center;
+  }
+  .iconbtn.danger { color: var(--red); border-color: color-mix(in srgb, var(--red) 32%, var(--line)); }
+  .hprog { display: flex; align-items: center; gap: 9px; font: 500 11px/1 var(--mono); color: var(--teal); padding-top: 3px; }
+  .hprog .bar { flex: 1; height: 3px; border-radius: 2px; background: var(--surface-3); position: relative; }
+  .hprog .bar i { position: absolute; inset: 0 auto 0 0; background: var(--teal); border-radius: 2px; }
+  .hdone { font: 600 11px/1 var(--mono); color: var(--teal); display: flex; align-items: center; gap: 6px; padding-top: 3px; }
+
+  .confirm {
+    border: 1px solid color-mix(in srgb, var(--red) 32%, var(--line));
+    border-radius: var(--r-sm); background: var(--red-wash);
+    padding: 13px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .confirm b { font-size: 13.5px; font-weight: 600; }
+  .confirm .cmeta { font: 500 11.5px/1.45 var(--mono); color: var(--text-2); }
+  .confirm p { font-size: 12.5px; line-height: 1.5; color: var(--text-2); }
+
+  .usage { display: flex; flex-direction: column; gap: 9px; }
+  .usage-bar { height: 11px; border-radius: 3px; background: var(--surface-3); display: flex; overflow: hidden; }
+  .usage-bar i { display: block; }
+  .usage-key { display: flex; gap: 16px; flex-wrap: wrap; font: 500 11px/1 var(--mono); color: var(--text-2); }
+  .usage-key span { display: flex; align-items: center; gap: 6px; }
+  .usage-key u { width: 8px; height: 8px; border-radius: 2px; text-decoration: none; }
+
+  /* ---------- sequence ---------- */
+  .seq { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
+  .step { display: flex; gap: 14px; padding: 14px 16px; border-bottom: 1px solid var(--line-soft); }
+  .step:last-child { border-bottom: 0; }
+  .step .sn {
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--surface-3); color: var(--text-2);
+    display: grid; place-items: center;
+    font: 600 11px/1 var(--mono);
+  }
+  .step[data-fail] .sn { background: var(--amber-wash); color: var(--amber); }
+  .step .sbody { display: flex; flex-direction: column; gap: 6px; }
+  .step .sbody b { font-size: 14px; font-weight: 600; }
+  .step .sbody p { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+  .step .sbody pre {
+    margin: 2px 0 0; padding: 9px 11px;
+    background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: var(--r-sm);
+    font: 500 12px/1.55 var(--mono); color: var(--text);
+    overflow-x: auto;
+  }
+
+  /* ---------- options page ---------- */
+  .opt {
+    display: grid; grid-template-columns: 172px 1fr;
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    background: var(--surface); overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .opt-nav { border-right: 1px solid var(--line-soft); background: var(--surface-2); padding: 16px 0; display: flex; flex-direction: column; gap: 1px; }
+  .opt-nav .brand { padding: 0 16px 14px; display: flex; flex-direction: column; gap: 3px; }
+  .opt-nav .brand b { font: 600 14px/1 var(--display); letter-spacing: .04em; }
+  .opt-nav .brand span { font: 500 10px/1 var(--mono); color: var(--text-3); }
+  .opt-nav a {
+    padding: 9px 16px; font-size: 13px; color: var(--text-2); text-decoration: none;
+    border-left: 2px solid transparent;
+  }
+  .opt-nav a.cur { color: var(--text); font-weight: 600; border-left-color: var(--amber-bright); background: var(--surface); }
+  .opt-main { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 22px; }
+  .opt-sec { display: flex; flex-direction: column; gap: 13px; }
+  .opt-sec > h3 { font-size: 15px; }
+  .opt-sec > .note { margin-top: -6px; }
+  .field { display: grid; grid-template-columns: 1fr 200px; gap: 16px; align-items: center; padding: 11px 0; border-top: 1px solid var(--line-soft); }
+  .field:first-of-type { border-top: 0; }
+  .field .fl { display: flex; flex-direction: column; gap: 3px; }
+  .field .fl b { font-size: 13.5px; font-weight: 600; }
+  .field .fl span { font-size: 12px; color: var(--text-3); line-height: 1.45; }
+  .slider { display: flex; align-items: center; gap: 10px; }
+  .slider .track { flex: 1; height: 4px; border-radius: 2px; background: var(--surface-3); position: relative; }
+  .slider .track i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--amber-bright); border-radius: 2px; }
+  .slider .track u { position: absolute; top: -5px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--amber-bright); }
+  .slider .val { font: 600 12px/1 var(--mono); font-variant-numeric: tabular-nums; width: 46px; text-align: right; }
+  .select {
+    border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface-2);
+    padding: 8px 11px; font: 500 12.5px/1 var(--mono); color: var(--text);
+    display: flex; justify-content: space-between; gap: 10px;
+  }
+  .select span { color: var(--text-3); }
+
+  .calib {
+    border: 1px solid var(--line); border-radius: var(--r-sm);
+    background: var(--surface-2); padding: 14px; display: flex; flex-direction: column; gap: 11px;
+  }
+  .calib-head { display: flex; align-items: baseline; gap: 10px; }
+  .calib-head b { font-size: 13.5px; font-weight: 600; }
+  .calib-head span { font: 500 10.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); margin-left: auto; }
+  .spark { height: 62px; display: flex; align-items: flex-end; gap: 2px; }
+  .spark i { flex: 1; background: var(--teal); border-radius: 1px 1px 0 0; min-height: 2px; opacity: .75; }
+  .spark i.over { background: var(--amber-bright); opacity: 1; }
+  .calib-axis { display: flex; justify-content: space-between; font: 500 10px/1 var(--mono); color: var(--text-3); border-top: 1px solid var(--line); padding-top: 6px; }
+
+  /* ---------- risks ---------- */
+  .risks { display: flex; flex-direction: column; gap: 10px; }
+  .risk {
+    display: grid; grid-template-columns: 116px 1fr; gap: 16px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-md); padding: 14px 16px;
+  }
+  .risk .rsev {
+    font: 600 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    align-self: start; padding: 5px 8px; border-radius: 3px; text-align: center;
+  }
+  .risk[data-sev="cao"] .rsev { background: var(--red-wash); color: var(--red); }
+  .risk[data-sev="vừa"] .rsev { background: var(--amber-wash); color: var(--amber); }
+  .risk[data-sev="thấp"] .rsev { background: var(--surface-3); color: var(--text-2); }
+  .risk .rbody { display: flex; flex-direction: column; gap: 5px; }
+  .risk .rbody b { font-size: 14px; font-weight: 600; }
+  .risk .rbody p { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+  .risk .rbody p.fix { color: var(--text); }
+  .risk .rbody p.fix::before { content: "Xử lý  "; font: 600 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--teal); }
+
+  /* ---------- swatches ---------- */
+  .swatches { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .swatch { border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; background: var(--surface); }
+  .swatch .chipc { height: 46px; }
+  .swatch .meta { padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+  .swatch .meta b { font-size: 12.5px; font-weight: 600; }
+  .swatch .meta span { font: 500 10.5px/1 var(--mono); color: var(--text-3); }
+
+  .tree {
+    margin: 0; padding: 16px 18px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+    font: 500 12.5px/1.75 var(--mono); color: var(--text-2);
+    overflow-x: auto;
+  }
+  .tree b { color: var(--text); font-weight: 600; }
+  .tree em { font-style: normal; color: var(--text-3); }
+
+  footer {
+    margin-top: 76px; padding-top: 22px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap;
+    font: 500 11.5px/1.5 var(--mono); color: var(--text-3);
+  }
+
+  @media (max-width: 720px) {
+    .opt { grid-template-columns: 1fr; }
+    .opt-nav { flex-direction: row; overflow-x: auto; padding: 10px; }
+    .opt-nav .brand { display: none; }
+    .opt-nav a { border-left: 0; border-bottom: 2px solid transparent; white-space: nowrap; }
+    .opt-nav a.cur { border-left: 0; border-bottom-color: var(--amber-bright); }
+    .field { grid-template-columns: 1fr; gap: 8px; }
+    .risk { grid-template-columns: 1fr; gap: 8px; }
+    .risk .rsev { justify-self: start; }
+    .stage { min-height: 300px; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="brandline">
+      <span class="reclamp"></span>
+      <span class="eyebrow">Bản thiết kế giao diện · Tiện ích Chrome MV3 · v0.1</span>
+    </div>
+    <h1>MeetCap — ghi phụ đề và bắt slide, tự chạy khi bạn vào họp</h1>
+    <p class="lede">
+      Chuyển đoạn script Console <span class="mono">idea.js v7</span> thành một tiện ích có ba bề mặt:
+      HUD nổi trong trang Meet, popup trên thanh công cụ, và trang cài đặt. Tài liệu này chốt trạng thái,
+      bố cục, cách nhận ra cuộc họp, cách lưu lịch sử theo từng phòng, và toàn bộ chữ hiển thị trước khi viết code.
+    </p>
+    <div class="metastrip">
+      <div><b>3</b><span>Bề mặt</span></div>
+      <div><b>5</b><span>Trạng thái</span></div>
+      <div><b>2</b><span>Kênh dữ liệu</span></div>
+      <div><b>0</b><span>Máy chủ</span></div>
+    </div>
+  </header>
+
+  <section id="nguyen-tac">
+    <div class="sechead">
+      <span class="num">01 — Nguyên tắc</span>
+      <h2>Năm quy tắc mọi màn hình phải theo</h2>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <h3>Một cuộc họp, một bản ghi</h3>
+        <p>Tải lại trang, rớt mạng hay vào lại đều nối vào bản ghi cũ chứ không đẻ ra bản thứ hai. Người dùng không phải nhớ bấm lưu.</p>
+      </div>
+      <div class="card">
+        <h3>Không giả làm Meet</h3>
+        <p>HUD dùng hổ phách, không dùng xanh Google. Người dùng phải biết ngay đây là tiện ích của bên thứ ba chứ không phải nút của Meet.</p>
+      </div>
+      <div class="card">
+        <h3>Tự động là mặc định</h3>
+        <p>Vào họp thì tự ghi, tự bật phụ đề. Popup chỉ để xem lại và xuất file. Không có bước "bấm bắt đầu" nào bắt buộc.</p>
+      </div>
+      <div class="card">
+        <h3>Đang ghi thì phải thấy</h3>
+        <p>Tiện ích ghi lời của người khác nên khi ghi, HUD không bao giờ ẩn hoàn toàn — thu nhỏ tối đa vẫn còn chấm đỏ nhấp nháy.</p>
+      </div>
+      <div class="card">
+        <h3>Số liệu đọc trong một giây</h3>
+        <p>Δ, số lượt, số ảnh, thời lượng đều là chữ mono canh cột. Thanh Δ có vạch ngưỡng để biết vì sao khung hình bị bỏ qua.</p>
+      </div>
+      <div class="card">
+        <h3>Tiện ích không phải chỗ đọc</h3>
+        <p>Popup rộng 360px, đọc biên bản ở đây rất tệ. Bấm vào bản ghi là <b>chép ngay</b> để dán sang nơi bạn thật sự đọc — không có trình xem trong tiện ích.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="trang-thai">
+    <div class="sechead">
+      <span class="num">02 — Phát hiện</span>
+      <h2>Máy trạng thái</h2>
+      <p class="note">
+        Meet là ứng dụng một trang: URL đổi mà không tải lại. Content script chạy trên
+        <code>https://meet.google.com/*</code>, theo dõi bằng <code>MutationObserver</code> trên
+        <code>body</code> (debounce 400ms) cộng một nhịp kiểm tra 1s, và bắt đổi URL qua
+        <code>navigation.addEventListener("navigate")</code>. Mỗi lần đánh giá lại toàn bộ tín hiệu rồi
+        so với trạng thái hiện tại; chỉ chuyển trạng thái khi tín hiệu mới giữ ổn định 1,5 giây để tránh nhấp nháy lúc Meet dựng DOM.
+      </p>
+    </div>
+
+    <div class="flow">
+      <div class="fstate" data-tone="idle">
+        <span class="fname">Ngoài Meet</span>
+        <span class="fcond">host ≠ meet.google.com</span>
+        <span class="fdo">Không chèn gì. Badge trống. Popup hiện màn hình rỗng có nút <b>Mở Google Meet</b>.</span>
+      </div>
+      <div class="fstate" data-tone="idle">
+        <span class="fname">Trang chủ Meet</span>
+        <span class="fcond">path = "/" hoặc "/landing"</span>
+        <span class="fdo">Content script đã nạp và đang chờ. Badge trống. Popup cho chỉnh sẵn tuỳ chọn tự động.</span>
+      </div>
+      <div class="fstate" data-tone="wait">
+        <span class="fname">Phòng chờ</span>
+        <span class="fcond">path khớp mã phòng<br>KHÔNG có nút call_end</span>
+        <span class="fdo">Badge chấm teal. HUD hiện dạng viên thuốc <b>Sẵn sàng ghi</b>, chưa đếm gì.</span>
+      </div>
+      <div class="fstate" data-tone="live">
+        <span class="fname">Đang họp</span>
+        <span class="fcond">có nút call_end<br>+ có video readyState ≥ 2</span>
+        <span class="fdo">Chạy chuỗi tự động: <b>bật ghi → bật phụ đề → bắt đầu chụp</b>. Badge <b>REC</b> đỏ. HUD mở rộng 6 giây rồi tự thu.</span>
+      </div>
+      <div class="fstate" data-tone="done">
+        <span class="fname">Đã rời</span>
+        <span class="fcond">mất call_end quá 3s<br>hoặc tab đóng</span>
+        <span class="fdo"><b>Chỉ dừng ghi, không tự tải gì.</b> Chốt bản ghi, badge đổi thành số lượt. Popup mở ra là màn hình tổng kết.</span>
+      </div>
+    </div>
+
+    <h3 style="margin:30px 0 12px">Bảng tín hiệu</h3>
+    <p class="note" style="margin-bottom:14px">
+      Meet đổi tên class liên tục nên không tín hiệu nào được đứng một mình. Ưu tiên chữ ligature của
+      Material Symbols (<code>&lt;i class="google-symbols"&gt;call_end&lt;/i&gt;</code>) vì nó không đổi theo ngôn ngữ
+      và ổn định hơn class băm. Toàn bộ selector gom vào một file <code>selectors.js</code>, mỗi tín hiệu có ít nhất hai lớp dự phòng.
+    </p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Tín hiệu</th><th>Cách tìm</th><th>Nói lên điều gì</th><th>Dự phòng</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="k">Mã phòng</td>
+            <td class="m">/^[a-z]{3}-[a-z]{4}-[a-z]{3}$/ trên pathname</td>
+            <td>Đang ở một phòng cụ thể</td>
+            <td class="m">path /lookup/*, /_meet/*</td>
+          </tr>
+          <tr>
+            <td class="k">Nút rời cuộc gọi</td>
+            <td class="m">i.google-symbols có text "call_end"</td>
+            <td><b>Đã vào trong cuộc họp</b> — tín hiệu chính</td>
+            <td class="m">button[aria-label] khớp regex đa ngôn ngữ</td>
+          </tr>
+          <tr>
+            <td class="k">Nút phụ đề</td>
+            <td class="m">i.google-symbols có text bắt đầu bằng "closed_caption" → closest("button")</td>
+            <td>Thanh công cụ trong cuộc gọi đã dựng xong</td>
+            <td class="m">[jscontroller="FBlsNe"] button[jsname="RrG0hf"]</td>
+          </tr>
+          <tr>
+            <td class="k">Phụ đề đang bật</td>
+            <td class="m">tồn tại [role="region"][aria-label] khớp LABEL_RX</td>
+            <td>Có thể bắt đầu đọc lời</td>
+            <td class="m">.vNKgIf.UDinHf · [jsname="dsyhDe"] · ligature closed_caption_off</td>
+          </tr>
+          <tr>
+            <td class="k">Video dùng được</td>
+            <td class="m">video có videoWidth &gt; 0 và readyState ≥ 2</td>
+            <td>Chụp được khung hình</td>
+            <td class="m">chọn video độ phân giải cao nhất, hoặc do người dùng ghim</td>
+          </tr>
+          <tr>
+            <td class="k">Đã kết thúc</td>
+            <td class="m">mất call_end liên tục 3s</td>
+            <td>Rời họp hoặc bị ngắt</td>
+            <td class="m">tabs.onRemoved · onUpdated đổi URL</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="hud">
+    <div class="sechead">
+      <span class="num">03 — Bề mặt 1</span>
+      <h2>HUD trong trang</h2>
+      <p class="note">
+        Dựng trong <code>Shadow DOM</code> (mode closed) để CSS của Meet không đụng tới và ngược lại. Neo mặc định
+        góc trái dưới, trên thanh công cụ Meet 80px. Kéo thả được, vị trí lưu theo từng mã phòng.
+        HUD luôn tối, kể cả khi hệ thống đang ở giao diện sáng — nó nằm đè lên video nên đây là lựa chọn có chủ ý.
+      </p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Trạng thái HUD">
+      <button class="tab" role="tab" aria-selected="true" data-hud="rec">Đang ghi · thu gọn</button>
+      <button class="tab" role="tab" aria-selected="false" data-hud="open">Đang ghi · mở rộng</button>
+      <button class="tab" role="tab" aria-selected="false" data-hud="lobby">Phòng chờ</button>
+      <button class="tab" role="tab" aria-selected="false" data-hud="toast">Thông báo</button>
+      <button class="tab" role="tab" aria-selected="false" data-hud="warn">Cảnh báo</button>
+    </div>
+
+    <div class="stage">
+      <div class="stage-slide">
+        <div class="slide-title"></div>
+        <div class="slide-sub"></div>
+        <div class="slide-chart">
+          <i style="height:38%"></i><i style="height:56%"></i><i style="height:82%"></i>
+          <i style="height:47%"></i><i style="height:64%"></i><i style="height:29%"></i>
+        </div>
+      </div>
+      <div class="stage-tiles"><div>PL</div><div>TH</div></div>
+      <div class="stage-cc">
+        <p><b>Phương Linh</b>Quý ba mình tăng hai mươi hai phần trăm so với cùng kỳ</p>
+      </div>
+      <div class="stage-bar">
+        <span class="cbtn">mic</span>
+        <span class="cbtn">cam</span>
+        <span class="cbtn on">cc</span>
+        <span class="cbtn">···</span>
+        <span class="cbtn hang">end</span>
+      </div>
+      <span class="stage-code">kqr-mfvd-xzt</span>
+
+      <div class="hud-anchor">
+        <!-- thu gọn -->
+        <div class="hud" data-hud-view="rec">
+          <div class="hud-pill">
+            <span class="hud-grip"></span>
+            <span class="dot blink"></span>
+            <span class="hud-stat">128 lượt<s>·</s>14 ảnh<s>·</s>42:17</span>
+            <span class="hud-chev">▲</span>
+          </div>
+        </div>
+
+        <!-- mở rộng -->
+        <div class="hud hud-panel" data-hud-view="open" hidden>
+          <div class="hud-head">
+            <span class="dot blink"></span>
+            <span class="hud-stat" style="font-weight:600">ĐANG GHI</span>
+            <span class="spacer"></span>
+            <span class="name">meetcap</span>
+            <span class="hbtn icon ghost">▼</span>
+          </div>
+          <div class="hud-body">
+            <div class="hud-nums">
+              <span class="hud-num"><b>128</b><span>Lượt nói</span></span>
+              <span class="hud-num"><b class="teal">14</b><span>Ảnh</span></span>
+              <span class="hud-num"><b>42:17</b><span>Thời lượng</span></span>
+            </div>
+
+            <div class="meter">
+              <div class="meter-top"><span>Δ khung hình</span><b>2,1 %</b></div>
+              <div class="meter-track">
+                <div class="meter-fill" style="width:21%"></div>
+                <div class="meter-thresh" style="left:50%" data-label="ngưỡng 5%"></div>
+              </div>
+              <div class="meter-ticks"><i>0</i><i>5</i><i>10</i></div>
+            </div>
+
+            <p class="hud-live"><b>Phương Linh</b> Quý ba mình tăng hai mươi hai phần trăm so với cùng kỳ…</p>
+
+            <div class="hud-row">
+              <button class="hbtn primary">Chụp ngay</button>
+              <button class="hbtn">Tạm dừng</button>
+              <button class="hbtn">Sao chép</button>
+            </div>
+          </div>
+          <div class="hud-foot"><span class="ok">●</span> Phụ đề bật · video 1280×720 · đã lưu 18,4 MB</div>
+        </div>
+
+        <!-- phòng chờ -->
+        <div class="hud" data-hud-view="lobby" hidden>
+          <div class="hud-pill">
+            <span class="hud-grip"></span>
+            <span class="dot grey"></span>
+            <span class="hud-stat">Sẵn sàng — sẽ tự ghi khi bạn vào họp</span>
+          </div>
+        </div>
+
+        <!-- toast -->
+        <div class="toast-stack" data-hud-view="toast" hidden>
+          <div class="toast">
+            <span class="dot" style="margin-top:3px;background:var(--teal-bright)"></span>
+            <span><b>Đã vào họp — bắt đầu ghi</b>Phụ đề đã được bật tự động.</span>
+          </div>
+          <div class="hud">
+            <div class="hud-pill">
+              <span class="hud-grip"></span>
+              <span class="dot blink"></span>
+              <span class="hud-stat">0 lượt<s>·</s>1 ảnh<s>·</s>0:04</span>
+              <span class="hud-chev">▲</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- cảnh báo -->
+        <div class="toast-stack" data-hud-view="warn" hidden>
+          <div class="toast warn">
+            <span class="dot amber" style="margin-top:3px"></span>
+            <span>
+              <b>Chưa bật được phụ đề</b>
+              Meet đang hỏi chọn ngôn ngữ phụ đề. Chọn giúp một lần, những lần sau tiện ích tự bật.
+              <span class="tact">Mở hộp thoại →</span>
+            </span>
+          </div>
+          <div class="hud">
+            <div class="hud-pill">
+              <span class="hud-grip"></span>
+              <span class="dot amber"></span>
+              <span class="hud-stat">Đang chờ phụ đề<s>·</s>2 ảnh</span>
+              <span class="hud-chev">▲</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="caption">Nền Meet mô phỏng · HUD ở tỉ lệ 1:1 · kéo tab để đổi trạng thái</p>
+
+    <div class="cards" style="margin-top:22px">
+      <div class="card">
+        <h3>Thu gọn là mặc định</h3>
+        <p>Sau khi vào họp, HUD mở rộng 6 giây để xác nhận đã chạy rồi tự thu về viên thuốc. Bấm để mở lại; trạng thái mở/thu nhớ theo phòng.</p>
+      </div>
+      <div class="card">
+        <h3>Chấm đỏ không tắt được</h3>
+        <p>Có thể thu nhỏ và kéo đi chỗ khác, không có nút ẩn hẳn. Muốn hết chấm đỏ thì bấm Tạm dừng — lúc đó chấm chuyển xám.</p>
+      </div>
+      <div class="card">
+        <h3>Δ có vạch ngưỡng</h3>
+        <p>Thanh teal là Δ hiện tại, vạch hổ phách là <code>minChangeRatio</code>. Nhìn một cái là biết vì sao khung hình vừa rồi không được lưu.</p>
+      </div>
+      <div class="card">
+        <h3>Thông báo tự tan</h3>
+        <p>Toast nổi ngay trên HUD, tự tan sau 5 giây. Toast có hành động (như hộp thoại ngôn ngữ) thì ở lại tới khi bấm.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="tu-bat-cc">
+    <div class="sechead">
+      <span class="num">04 — Chuỗi tự động</span>
+      <h2>Tự bật phụ đề</h2>
+      <p class="note">
+        Bấm nút thật thay vì giả lập phím <span class="mono">c</span>: Meet lắng nghe qua <code>jsaction</code> nên
+        <code>el.click()</code> từ content script vẫn kích hoạt, còn <code>KeyboardEvent</code> tổng hợp thì hay bị bỏ qua.
+        Quan trọng nhất là bước xác minh — bấm mù rất dễ vô tình <em>tắt</em> phụ đề mà người dùng đang bật sẵn.
+      </p>
+    </div>
+
+    <div class="seq">
+      <div class="step">
+        <span class="sn">1</span>
+        <div class="sbody">
+          <b>Kiểm tra trước khi bấm</b>
+          <p>Nếu vùng phụ đề đã tồn tại thì phụ đề đang bật — không đụng vào nút. Đây là bước chống tự tắt.</p>
+          <pre>if (findCaptionRegion()) return "already-on";</pre>
+        </div>
+      </div>
+      <div class="step">
+        <span class="sn">2</span>
+        <div class="sbody">
+          <b>Tìm nút theo ligature, không theo aria-label</b>
+          <p>Nhãn đổi theo ngôn ngữ giao diện, ligature của icon thì không.</p>
+          <pre>const btn = [...document.querySelectorAll("button i.google-symbols")]
+  .find(i =&gt; i.textContent.trim().startsWith("closed_caption"))
+  ?.closest("button")
+  ?? document.querySelector('[jscontroller="FBlsNe"] button[jsname="RrG0hf"]');</pre>
+        </div>
+      </div>
+      <div class="step">
+        <span class="sn">3</span>
+        <div class="sbody">
+          <b>Bấm rồi chờ vùng phụ đề xuất hiện</b>
+          <p>Dùng <code>MutationObserver</code> có hạn 3 giây thay vì <code>setTimeout</code> cố định, để máy chậm vẫn kịp.</p>
+          <pre>btn.click();
+const ok = await waitFor(findCaptionRegion, 3000);</pre>
+        </div>
+      </div>
+      <div class="step" data-fail>
+        <span class="sn">4</span>
+        <div class="sbody">
+          <b>Không thấy vùng phụ đề → phân biệt hai nguyên nhân</b>
+          <p>Nếu có <code>[role="dialog"]</code> vừa mở, đó là hộp chọn ngôn ngữ phụ đề của lần đầu dùng: <em>không</em> tự chọn thay người dùng, chỉ hiện toast có nút. Nếu không có hộp thoại, coi như bấm hụt: bấm lại tối đa 2 lần, mỗi lần cách 1,5 giây.</p>
+        </div>
+      </div>
+      <div class="step" data-fail>
+        <span class="sn">5</span>
+        <div class="sbody">
+          <b>Hết lượt thử → chuyển sang chế độ chỉ chụp ảnh</b>
+          <p>HUD chuyển chấm hổ phách, ghi ảnh vẫn chạy, và một <code>MutationObserver</code> nền vẫn theo dõi: người dùng tự bấm CC lúc nào thì phần phụ đề tự nối vào lúc đó.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="sn">6</span>
+        <div class="sbody">
+          <b>Tuỳ chọn: giữ phụ đề luôn bật</b>
+          <p>Mặc định <b>tắt</b>. Khi bật, nếu vùng phụ đề biến mất mà tiện ích không phải bên tắt, nó bật lại một lần rồi thôi — người dùng chủ động tắt lần thứ hai thì tôn trọng, không giành nút.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="popup">
+    <div class="sechead">
+      <span class="num">05 — Bề mặt 2</span>
+      <h2>Popup trên thanh công cụ</h2>
+      <p class="note">
+        Rộng 360px, cao tự co theo nội dung, tối đa 600px. Hai thẻ: <b>Cuộc họp này</b> để theo dõi buổi đang chạy,
+        <b>Lịch sử</b> để chép, sửa tên hoặc xoá các buổi cũ. Mọi thao tác cần trong lúc họp đều đã có sẵn trên HUD nên
+        popup chủ yếu là nơi lấy dữ liệu ra. Popup theo giao diện sáng/tối của trình duyệt.
+      </p>
+      <p class="note">
+        Thẻ <b>Cuộc họp này</b> chỉ có đúng hai trạng thái: <b>đang chờ</b> và <b>đang ghi</b>. Không có màn
+        “họp xong” — buổi đã kết thúc thì thuộc về thẻ Lịch sử, nhân bản nó ra hai chỗ chỉ làm người dùng
+        phải nghĩ xem nên bấm ở đâu.
+      </p>
+    </div>
+
+    <div class="strip">
+      <figure class="shot">
+        <figcaption><b>Đang ghi</b>Trạng thái chính</figcaption>
+        <div class="popup">
+          <div class="p-head">
+            <span class="wordmark">MeetCap</span>
+            <span class="code">kqr-mfvd-xzt</span>
+            <span class="spacer"></span>
+            <span class="pill rec"><span class="dot blink"></span>Đang ghi</span>
+          </div>
+          <div class="ptabs">
+            <button class="ptab cur">Cuộc họp này</button>
+            <button class="ptab">Lịch sử · 12</button>
+          </div>
+          <div class="p-body">
+            <div class="tiles">
+              <span class="tile"><b>128</b><span>Lượt nói</span></span>
+              <span class="tile"><b class="teal">14</b><span>Ảnh</span></span>
+              <span class="tile"><b>42:17</b><span>Thời lượng</span></span>
+            </div>
+            <div class="pmeter">
+              <div class="pmeter-top"><span>Δ khung hình · ngưỡng 5%</span><b>2,1 %</b></div>
+              <div class="pmeter-track">
+                <div class="pmeter-fill" style="width:21%"></div>
+                <div class="pmeter-thresh" style="left:50%"></div>
+              </div>
+            </div>
+            <div class="transcript">
+              <div class="tline"><span class="tt">41:52</span><span class="tx"><b>Phương Linh</b> Quý ba mình tăng hai mươi hai phần trăm so với cùng kỳ.</span></div>
+              <div class="tframe"><span>▣</span><span>Ảnh 14 · 42:03 · 512×288</span></div>
+              <div class="tline"><span class="tt">42:11</span><span class="tx"><b>Thanh Hải</b> Cho mình xin lại slide này nhé.</span></div>
+            </div>
+            <div class="btnrow">
+              <button class="btn amber">Chụp ngay</button>
+              <button class="btn">Tạm dừng</button>
+            </div>
+            <div class="btnrow">
+              <button class="btn">Tải .md</button>
+              <button class="btn primary">Sao chép</button>
+            </div>
+          </div>
+          <div class="p-foot">
+            <span>18,4 MB trong máy</span>
+            <span class="spacer"></span>
+            <a href="#cai-dat">Cài đặt</a>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="shot">
+        <figcaption><b>Chờ</b>Một màn cho cả hai trường hợp</figcaption>
+        <div class="popup">
+          <div class="p-head">
+            <span class="wordmark">MeetCap</span>
+            <span class="code">kqr-mfvd-xzt</span>
+            <span class="spacer"></span>
+            <span class="pill wait">Sẵn sàng</span>
+          </div>
+          <div class="ptabs">
+            <button class="ptab cur">Cuộc họp này</button>
+            <button class="ptab">Lịch sử · 12</button>
+          </div>
+          <div class="p-body">
+            <div class="empty" style="padding-top:8px">
+              <h3>Đang chờ bạn vào họp</h3>
+              <p>Bấm “Tham gia ngay” trên Meet, tiện ích sẽ tự chạy. Không cần mở lại cửa sổ này.</p>
+            </div>
+            <div class="checklist">
+              <span class="ck"><i>✓</i> Tự ghi khi vào họp</span>
+              <span class="ck"><i>✓</i> Tự bật phụ đề</span>
+              <span class="ck"><i>✓</i> Tự chụp khi hình đổi <span class="mono" style="color:var(--text-3)">— ngưỡng 5,0%</span></span>
+              <span class="ck"><i class="off">○</i> Giữ phụ đề luôn bật</span>
+            </div>
+            <div class="btnrow">
+              <button class="btn">Cài đặt</button>
+            </div>
+          </div>
+          <div class="p-foot">
+            <span>12 bản ghi · 218 MB</span>
+            <span class="spacer"></span>
+            <a href="#cai-dat">Cài đặt</a>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="shot">
+        <figcaption><b>Tạm dừng</b>Người dùng dừng tay</figcaption>
+        <div class="popup">
+          <div class="p-head">
+            <span class="wordmark">MeetCap</span>
+            <span class="code">kqr-mfvd-xzt</span>
+            <span class="spacer"></span>
+            <span class="pill pause">Tạm dừng</span>
+          </div>
+          <div class="p-body">
+            <div class="tiles">
+              <span class="tile"><b>128</b><span>Lượt nói</span></span>
+              <span class="tile"><b class="teal">14</b><span>Ảnh</span></span>
+              <span class="tile"><b>42:17</b><span>Thời lượng</span></span>
+            </div>
+            <p class="note" style="font-size:12.5px">Đã dừng lúc 42:17. Phụ đề vẫn hiện trên Meet nhưng không được ghi lại.</p>
+            <div class="btnrow">
+              <button class="btn amber">Chụp ngay</button>
+              <button class="btn">Ghi tiếp</button>
+            </div>
+            <div class="btnrow">
+              <button class="btn">Tải .md</button>
+              <button class="btn primary">Sao chép</button>
+            </div>
+          </div>
+          <div class="p-foot"><span>18,4 MB trong máy</span><span class="spacer"></span><a href="#cai-dat">Cài đặt</a></div>
+        </div>
+      </figure>
+
+      <figure class="shot">
+        <figcaption><b>Lịch sử</b>Bấm hàng là chép</figcaption>
+        <div class="popup">
+          <div class="p-head">
+            <span class="wordmark">MeetCap</span>
+            <span class="spacer"></span>
+            <span class="pill rec"><span class="dot blink"></span>Đang ghi</span>
+          </div>
+          <div class="ptabs">
+            <button class="ptab">Cuộc họp này</button>
+            <button class="ptab cur">Lịch sử · 12</button>
+          </div>
+          <div class="p-body">
+            <div class="hhint">
+              <span>Bấm vào bản ghi để chép markdown</span>
+            </div>
+            <div class="hist">
+              <div class="hrow live">
+                <span class="hmain">
+                  <span class="hcode"><span class="dot blink"></span>kqr-mfvd-xzt</span>
+                  <span class="htitle">Họp kế hoạch quý 3</span>
+                  <span class="hmeta">Hôm nay 09:15 · đang ghi 42:17<br>128 lượt · 14 ảnh · 18,4 MB</span>
+                </span>
+                <span class="hacts">
+                  <span class="iconbtn">⧉</span>
+                  <span class="iconbtn">✎</span>
+                  <span class="iconbtn danger">✕</span>
+                </span>
+              </div>
+
+              <div class="hrow hot">
+                <span class="hmain">
+                  <span class="hcode">qtn-bwsc-jkm</span>
+                  <span class="htitle">Review thiết kế tuần 30</span>
+                  <span class="hmeta">Hôm qua 14:00 · 58:41 · 342 lượt · 51 ảnh · 62,8 MB</span>
+                  <span class="hprog"><span class="bar"><i style="width:35%"></i></span>Đang nén ảnh 18/51</span>
+                </span>
+                <span class="hacts">
+                  <span class="iconbtn">⧉</span>
+                  <span class="iconbtn">✎</span>
+                  <span class="iconbtn danger">✕</span>
+                </span>
+              </div>
+
+              <div class="hrow">
+                <span class="hmain">
+                  <span class="hcode">dvh-arqp-lze</span>
+                  <span class="htitle">Daily standup</span>
+                  <span class="hmeta">27.07 09:05 · 12:20 · 64 lượt · 3 ảnh · 4,1 MB</span>
+                  <span class="hdone">✓ Đã chép 64 lượt · 3 ảnh · 4,1 MB</span>
+                </span>
+                <span class="hacts">
+                  <span class="iconbtn">⧉</span>
+                  <span class="iconbtn">✎</span>
+                  <span class="iconbtn danger">✕</span>
+                </span>
+              </div>
+
+              <div class="hrow">
+                <span class="hmain">
+                  <span class="hcode">bkm-tywq-rfd</span>
+                  <span class="htitle">Phỏng vấn ứng viên BE</span>
+                  <span class="hmeta">26.07 15:30 · 47:02 · 210 lượt · 0 ảnh · 0,3 MB</span>
+                </span>
+                <span class="hacts">
+                  <span class="iconbtn">⧉</span>
+                  <span class="iconbtn">✎</span>
+                  <span class="iconbtn danger">✕</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="p-foot">
+            <span>12 bản ghi · 218 MB</span>
+            <span class="spacer"></span>
+            <a href="#cai-dat">Quản lý</a>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="shot">
+        <figcaption><b>Xác nhận xoá</b>Chặn ngay tại chỗ</figcaption>
+        <div class="popup">
+          <div class="p-head">
+            <span class="wordmark">MeetCap</span>
+            <span class="spacer"></span>
+            <span class="pill rec"><span class="dot blink"></span>Đang ghi</span>
+          </div>
+          <div class="ptabs">
+            <button class="ptab">Cuộc họp này</button>
+            <button class="ptab cur">Lịch sử · 12</button>
+          </div>
+          <div class="p-body">
+            <div class="hhint">
+              <span>Bấm vào bản ghi để chép markdown</span>
+            </div>
+            <div class="hist">
+              <div class="hrow dim">
+                <span class="hmain">
+                  <span class="hcode"><span class="dot blink"></span>kqr-mfvd-xzt</span>
+                  <span class="htitle">Họp kế hoạch quý 3</span>
+                  <span class="hmeta">Hôm nay 09:15 · đang ghi 42:17</span>
+                </span>
+              </div>
+
+              <div class="confirm">
+                <b>Xoá bản ghi này?</b>
+                <span class="cmeta">qtn-bwsc-jkm · Review thiết kế tuần 30<br>342 lượt nói · 51 ảnh · 62,8 MB</span>
+                <p>Không khôi phục lại được. Nếu cần giữ, hãy chép hoặc tải file trước.</p>
+                <div class="btnrow">
+                  <button class="btn">Huỷ</button>
+                  <button class="btn" style="background:var(--red);border-color:var(--red);color:#fff;font-weight:600">Xoá bản ghi</button>
+                </div>
+              </div>
+
+              <div class="hrow dim">
+                <span class="hmain">
+                  <span class="hcode">dvh-arqp-lze</span>
+                  <span class="htitle">Daily standup</span>
+                  <span class="hmeta">27.07 09:05 · 12:20 · 64 lượt · 3 ảnh</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="p-foot">
+            <span>12 bản ghi · 218 MB</span>
+            <span class="spacer"></span>
+            <a href="#cai-dat">Quản lý</a>
+          </div>
+        </div>
+      </figure>
+    </div>
+    <p class="caption">5 trạng thái ở tỉ lệ 1:1 (360px) · cuộn ngang để xem hết · ⧉ chép · ✎ sửa tên · ✕ xoá</p>
+  </section>
+
+  <section id="lich-su">
+    <div class="sechead">
+      <span class="num">06 — Lưu trữ</span>
+      <h2>Một cuộc họp là một bản ghi</h2>
+      <p class="note">
+        Quy tắc đã chốt: <b>khoá bản ghi chính là mã phòng</b>. Vào lại cùng một phòng thì luôn ghi tiếp
+        vào bản ghi cũ — tải lại trang, rớt mạng, đóng tab rồi mở lại đều không sinh bản thứ hai.
+      </p>
+    </div>
+
+    <div class="seq">
+      <div class="step">
+        <span class="sn">1</span>
+        <div class="sbody">
+          <b>Khoá bản ghi là mã phòng, không gì khác</b>
+          <p>Không có cửa sổ thời gian, không có mốc giờ trong khoá. Cùng mã là cùng bản ghi.</p>
+          <pre>recordId = code            // kqr-mfvd-xzt
+const rec = (await get(code)) ?? createRecord(code);</pre>
+        </div>
+      </div>
+      <div class="step" data-fail>
+        <span class="sn">2</span>
+        <div class="sbody">
+          <b>Đánh đổi phải biết trước</b>
+          <p>Cuộc họp định kỳ dùng lại y nguyên mã phòng, nên mọi buổi standup sẽ dồn vào <em>một</em> bản ghi. Đây là lựa chọn có chủ ý để việc tải lại trang không bao giờ làm gãy bản ghi. Muốn tách theo ngày thì đổi khoá thành <code>${code}#${ngày}</code> trong <code>openSession</code> — đúng một dòng.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="sn">3</span>
+        <div class="sbody">
+          <b>Mỗi lần vào là một “đoạn”, mốc giờ là thời gian nội dung cộng dồn</b>
+          <p>Nếu lấy giờ đồng hồ trừ mốc bắt đầu thì vào lại hôm sau sẽ ra 24:00:00. Vì vậy bản ghi giữ danh sách đoạn, và mốc của mỗi lượt nói là tổng thời lượng các đoạn trước cộng thời gian đã trôi trong đoạn hiện tại — vào lại thì tiếp ở 42:20.</p>
+          <pre>session.segments = [{ s, e }, …]
+baseOffset = Σ (e − s) của các đoạn trước
+at = baseOffset + (Date.now() − segmentStart)</pre>
+        </div>
+      </div>
+      <div class="step">
+        <span class="sn">4</span>
+        <div class="sbody">
+          <b>Ghi tiếp thì phải chống trùng lời</b>
+          <p>Sau khi tải lại trang, vài câu phụ đề cũ vẫn còn trên màn hình và sẽ được đọc lại. Đối chiếu với 6 lượt cuối đã lưu: cùng người nói và chuẩn hoá trùng tiền tố thì ghi đè bằng chính hàm <code>merge()</code> sẵn có, không thêm dòng. Ảnh thì đã có dHash lo — so với toàn bộ ảnh của bản ghi chứ không chỉ ảnh của phiên hiện tại.</p>
+        </div>
+      </div>
+      <div class="step" data-fail>
+        <span class="sn">5</span>
+        <div class="sbody">
+          <b>Hai tab cùng một phòng thì chỉ một tab được ghi</b>
+          <p>Service worker giữ <code>owner: tabId</code> cho mỗi bản ghi. Tab thứ hai vào cùng phòng sẽ ở chế độ theo dõi, HUD hiện “Cuộc họp này đang được ghi ở tab khác”, và tự nhận quyền nếu tab kia đóng.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="sn">6</span>
+        <div class="sbody">
+          <b>Đặt tên bản ghi cho người đọc</b>
+          <p>Lấy <code>document.title</code> đã bỏ tiền tố “Meet – ”. Nếu chỉ còn trơ mã phòng thì giữ mã. Người dùng sửa lại tên được ngay trong danh sách bằng nút <span class="mono">✎</span>, và tên đã sửa thì không bị Meet ghi đè ở lần vào sau.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin:34px 0 12px">Để dữ liệu ở đâu</h3>
+    <p class="note" style="margin-bottom:14px">
+      Lưu tất cả trong máy, không có máy chủ. Có một cái bẫy: IndexedDB mà content script mở ra thuộc gốc
+      <code>meet.google.com</code> — người dùng xoá dữ liệu trang là mất sạch, và popup <em>không đọc được</em> khi
+      không có tab Meet nào đang mở. Vì vậy kho chính đặt ở <b>gốc tiện ích</b>, do service worker sở hữu.
+    </p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Dữ liệu</th><th>Chỗ lưu</th><th>Cỡ điển hình</th><th>Vì sao</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="k">Danh mục bản ghi</td>
+            <td class="m">chrome.storage.local<br>meetcap:index</td>
+            <td class="m">~200 B/bản</td>
+            <td>Popup mở ra là có danh sách ngay, không phải chờ mở IndexedDB. Chỉ chứa id, mã, tên, mốc giờ, số đếm, dung lượng.</td>
+          </tr>
+          <tr>
+            <td class="k">Lời nói</td>
+            <td class="m">IndexedDB · store turns<br>key [recordId, seq]</td>
+            <td class="m">~80 KB/giờ</td>
+            <td>Hàng nghìn dòng, ghi thêm liên tục. Gom 2 giây một lần thay vì ghi từng lượt.</td>
+          </tr>
+          <tr>
+            <td class="k">Ảnh</td>
+            <td class="m">IndexedDB · store frames<br>key [recordId, id]</td>
+            <td class="m">40–90 KB/ảnh</td>
+            <td>Lưu thẳng ArrayBuffer, ghi ngay khi chụp. RAM chỉ giữ thumbnail để hiện đếm.</td>
+          </tr>
+          <tr>
+            <td class="k">Cài đặt</td>
+            <td class="m">chrome.storage.sync</td>
+            <td class="m">&lt; 8 KB</td>
+            <td>Theo người dùng sang máy khác. Ngưỡng chụp, tuỳ chọn tự động, định dạng chép mặc định.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cards" style="margin-top:20px">
+      <div class="card">
+        <h3>Chuyển ảnh sang service worker</h3>
+        <p><code>chrome.runtime.sendMessage</code> chỉ chuyển được JSON, không nhận Blob. Mã hoá base64 là xong: đội thêm 33%, khoảng 54 KB mỗi ảnh, nhiều nhất 1 ảnh/giây — không đáng kể. Nếu về sau thấy nghẽn thì đổi sang cầu iframe <code>chrome-extension://…/bridge.html</code> nhúng trong trang, nhận Blob nguyên vẹn qua <code>postMessage</code>.</p>
+      </div>
+      <div class="card">
+        <h3>Đừng thu nhỏ ảnh có chữ</h3>
+        <p>512px là mức của bản script và ở mức đó chữ trên slide không đọc được. Mặc định mới: <b>giữ nguyên độ phân giải luồng video</b>, WebP mức 0,92, chặn trên 2560px cho màn hình 4K.</p>
+      </div>
+      <div class="card">
+        <h3>Mờ có thể không phải lỗi của nén</h3>
+        <p>Meet <b>tự hạ độ phân giải luồng theo kích thước ô đang hiển thị</b>. Ô nhỏ thì <code>videoWidth</code> chỉ còn 640×360 và không nén cách nào cho nét lại được. HUD hiện độ phân giải thật của mỗi ảnh, và nhắc mở to phần trình bày khi luồng hẹp hơn 1000px.</p>
+      </div>
+      <div class="card">
+        <h3>Mã hoá sẵn base64 lúc chụp</h3>
+        <p>Ảnh lưu thẳng dưới dạng base64 thay vì nhị phân. Đội 33% dung lượng nhưng markdown xuất ra cũng là base64, nên lúc chép chỉ còn việc nối chuỗi — không phải nén lại gì.</p>
+      </div>
+      <div class="card">
+        <h3>Giữ chỗ trước khi bị dọn</h3>
+        <p>Xin quyền <code>unlimitedStorage</code> và gọi <code>navigator.storage.persist()</code> ngay lần chạy đầu, nếu không Chrome có quyền dọn kho khi máy đầy. <code>estimate()</code> cho ra con số thật để hiện ở chân popup.</p>
+      </div>
+      <div class="card">
+        <h3>Dọn ảnh trước, giữ chữ lại</h3>
+        <p>Mặc định giữ 30 ngày hoặc 2 GB, cái nào tới trước. Khi phải dọn thì xoá ảnh của bản ghi cũ nhất trước và giữ nguyên phần chữ — chữ nhẹ hơn ảnh cả trăm lần mà thường là thứ cần tìm lại.</p>
+      </div>
+    </div>
+
+    <h3 style="margin:34px 0 12px">Bấm là chép — và cái bẫy clipboard</h3>
+    <p class="note" style="margin-bottom:14px">
+      Chép nội dung dài phải nén ảnh trước, mà thao tác bất đồng bộ dài thì cử chỉ bấm chuột hết hiệu lực và
+      <code>navigator.clipboard.writeText</code> sẽ ném lỗi “Document is not focused”. Cách chắc ăn là đưa <em>lời hứa</em>
+      vào clipboard ngay trong lúc bấm, rồi mới đi nén:
+    </p>
+    <pre class="tree">await navigator.clipboard.write([
+  new ClipboardItem({ "text/plain": buildMarkdown(recordId) })   <em>// Promise&lt;Blob&gt;, giữ được cử chỉ bấm</em>
+]);</pre>
+    <p class="note" style="margin-top:14px">
+      Chỉ có <b>một định dạng duy nhất</b>: markdown tự chứa, ảnh nhúng base64. Không có ô chọn định dạng
+      ở đâu cả — bấm là chép markdown, hết.
+    </p>
+    <p class="note" style="margin-top:10px">
+      Vẫn cần chặn trên: bản ghi vượt <b>25 MB</b> thì không chép nữa mà tự tải <code>.md</code> và nói rõ lý do —
+      dán một chuỗi base64 sáu chục megabyte vào bất cứ đâu cũng làm treo trình soạn thảo. Ảnh nét thì mức
+      này bị chạm nhanh hơn, nên ngưỡng chỉnh được trong cài đặt.
+      Chép xong thì đổi màu hàng sang teal kèm số liệu vừa chép trong 3 giây, đủ để biết chắc là đã xong.
+    </p>
+  </section>
+
+  <section id="cai-dat">
+    <div class="sechead">
+      <span class="num">07 — Bề mặt 3</span>
+      <h2>Trang cài đặt</h2>
+      <p class="note">
+        Mọi hằng số trong <code>cfg</code> của bản script đều lên đây, nhóm theo việc chứ không theo tên biến.
+        Phần đắt giá nhất là <b>Hiệu chỉnh trực tiếp</b> — thay cho <code>__meetCap.tune()</code> phải đọc log Console.
+      </p>
+    </div>
+
+    <div class="opt">
+      <nav class="opt-nav">
+        <span class="brand"><b>MeetCap</b><span>v0.1.0</span></span>
+        <a href="#cai-dat" class="cur">Tự động hoá</a>
+        <a href="#cai-dat">Chụp ảnh</a>
+        <a href="#cai-dat">Chất lượng ảnh</a>
+        <a href="#cai-dat">Xuất file</a>
+        <a href="#cai-dat">Dữ liệu đã lưu</a>
+        <a href="#cai-dat">Về tiện ích</a>
+      </nav>
+      <div class="opt-main">
+        <div class="opt-sec">
+          <h3>Tự động hoá</h3>
+          <p class="note">Quyết định tiện ích được tự làm gì khi bạn vào một cuộc họp.</p>
+          <div class="field">
+            <span class="fl"><b>Tự ghi khi vào họp</b><span>Bắt đầu ngay khi phát hiện bạn đã vào trong cuộc gọi</span></span>
+            <span style="justify-self:end"><span class="knob on"></span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Tự bật phụ đề</b><span>Bấm nút CC giúp bạn, có kiểm tra lại để không lỡ tay tắt</span></span>
+            <span style="justify-self:end"><span class="knob on"></span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Giữ phụ đề luôn bật</b><span>Bật lại một lần nếu phụ đề bị tắt giữa chừng</span></span>
+            <span style="justify-self:end"><span class="knob"></span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Chụp ảnh khi hình đổi</b><span>Tắt thì chỉ ghi phụ đề, không chụp gì</span></span>
+            <span style="justify-self:end"><span class="knob on"></span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Bỏ qua các phòng này</b><span>Mỗi dòng một mã phòng — tiện ích sẽ nằm im</span></span>
+            <span class="select">2 phòng <span>▾</span></span>
+          </div>
+        </div>
+
+        <div class="opt-sec">
+          <h3>Ngưỡng chụp ảnh</h3>
+          <p class="note">Ba tầng lọc của bản script v7: đủ đổi thì mới xét, đứng yên thì mới chụp, trùng slide cũ thì bỏ.</p>
+          <div class="field">
+            <span class="fl"><b>Mức đổi tối thiểu</b><span>minChangeRatio — dưới mức này coi là chuột hoặc đồng hồ nhấp nháy</span></span>
+            <span class="slider"><span class="track"><i style="width:33%"></i><u style="left:calc(33% - 7px)"></u></span><span class="val">5,0 %</span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Mức coi là đứng yên</b><span>settleRatio — chờ khung hình hết chuyển động rồi mới bấm máy</span></span>
+            <span class="slider"><span class="track"><i style="width:15%"></i><u style="left:calc(15% - 7px)"></u></span><span class="val">1,5 %</span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Sai lệch độ sáng</b><span>pixelTol — chênh bao nhiêu thì tính là một ô đã đổi</span></span>
+            <span class="slider"><span class="track"><i style="width:24%"></i><u style="left:calc(24% - 7px)"></u></span><span class="val">12</span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Khoảng cách hash</b><span>threshold — chống lưu lại slide đã có</span></span>
+            <span class="slider"><span class="track"><i style="width:38%"></i><u style="left:calc(38% - 7px)"></u></span><span class="val">6</span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Nhịp kiểm tra</b><span>watchMs — càng dày càng bắt kịp slide nhanh, càng tốn CPU</span></span>
+            <span class="select">1000 ms <span>▾</span></span>
+          </div>
+
+          <div class="calib">
+            <div class="calib-head">
+              <b>Hiệu chỉnh trực tiếp</b>
+              <span>15 giây gần nhất · kqr-mfvd-xzt</span>
+            </div>
+            <p class="note" style="font-size:12.5px">
+              Thử di chuột rồi đổi slide và so hai vùng. Cột hổ phách là những nhịp vượt ngưỡng — đó là lúc tiện ích sẽ chụp.
+            </p>
+            <div class="spark">
+              <i style="height:8%"></i><i style="height:11%"></i><i style="height:6%"></i><i style="height:14%"></i>
+              <i style="height:9%"></i><i style="height:12%"></i><i style="height:7%"></i>
+              <i class="over" style="height:88%"></i><i class="over" style="height:62%"></i>
+              <i style="height:13%"></i><i style="height:8%"></i><i style="height:10%"></i>
+              <i style="height:6%"></i><i class="over" style="height:74%"></i><i style="height:12%"></i>
+            </div>
+            <div class="calib-axis"><span>0 s</span><span>di chuột</span><span>đổi slide</span><span>15 s</span></div>
+            <div class="btnrow" style="max-width:280px">
+              <button class="btn">Đo lại 15 giây</button>
+              <button class="btn primary">Lấy ngưỡng gợi ý 4,2 %</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="opt-sec">
+          <h3>Chất lượng ảnh</h3>
+          <div class="risk" data-sev="vừa" style="grid-template-columns:1fr;gap:6px;margin:2px 0 8px">
+            <div class="rbody">
+              <b>Ảnh mờ không đọc được chữ?</b>
+              <p>Meet tự hạ độ phân giải luồng video theo kích thước ô đang hiển thị. Ô nhỏ thì luồng chỉ còn 640×360 và không có cách nào nén cho nét lại được. Muốn ảnh nét thì <b>ghim hoặc mở to phần trình bày</b> — HUD hiện độ phân giải thật của mỗi ảnh để kiểm tra ngay.</p>
+            </div>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Độ phân giải ảnh lưu</b><span>Slide có chữ thì thu nhỏ là mất chữ</span></span>
+            <span class="select">Giữ nguyên luồng video <span>▾</span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Chặn trên</b><span>Màn hình 4K thì cắt bớt để một ảnh không thành vài megabyte</span></span>
+            <span class="select">2560 px <span>▾</span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Mức nén</b><span>Dưới 0,80 là bắt đầu nhoè nét chữ</span></span>
+            <span class="slider"><span class="track"><i style="width:84%"></i><u style="left:calc(84% - 7px)"></u></span><span class="val">0,92</span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Định dạng</b><span>WebP nhỏ hơn JPEG ở cùng độ nét</span></span>
+            <span class="select">WebP <span>▾</span></span>
+          </div>
+        </div>
+
+        <div class="opt-sec">
+          <h3>Dữ liệu đã lưu</h3>
+          <p class="note">Tất cả nằm trong máy bạn. Tiện ích không có quyền gửi ra ngoài meet.google.com.</p>
+
+          <div class="usage">
+            <div class="usage-bar">
+              <i style="width:71%;background:var(--teal)"></i>
+              <i style="width:4%;background:var(--amber-bright)"></i>
+              <i style="width:25%;background:var(--surface-3)"></i>
+            </div>
+            <div class="usage-key">
+              <span><u style="background:var(--teal)"></u>Ảnh · 201 MB</span>
+              <span><u style="background:var(--amber-bright)"></u>Lời nói · 11 MB</span>
+              <span><u style="background:var(--surface-3)"></u>Còn trống trong hạn 2 GB</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="fl"><b>Giữ bản ghi trong</b><span>Quá hạn thì xoá dần từ bản cũ nhất</span></span>
+            <span class="select">30 ngày <span>▾</span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Hạn dung lượng</b><span>Chạm hạn thì dọn ảnh của bản ghi cũ nhất trước, phần chữ giữ lại</span></span>
+            <span class="select">2 GB <span>▾</span></span>
+          </div>
+          <div class="field">
+            <span class="fl"><b>Ngưỡng chuyển sang tải file</b><span>Bản ghi lớn hơn mức này thì tải .md thay vì chép, tránh treo chỗ dán</span></span>
+            <span class="select">25 MB <span>▾</span></span>
+          </div>
+
+          <div class="scroll" style="margin-top:4px">
+            <table>
+              <thead><tr><th>Bản ghi</th><th>Bắt đầu</th><th>Dài</th><th>Lượt</th><th>Ảnh</th><th>Cỡ</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><b>Họp kế hoạch quý 3</b><br><span class="mono" style="font-size:11.5px;color:var(--text-3)">kqr-mfvd-xzt</span></td>
+                  <td class="m">Hôm nay 09:15</td><td class="m">42:17</td><td class="m">128</td><td class="m">14</td><td class="m">18,4 MB</td>
+                  <td><span class="iconbtn danger">✕</span></td>
+                </tr>
+                <tr>
+                  <td><b>Review thiết kế tuần 30</b><br><span class="mono" style="font-size:11.5px;color:var(--text-3)">qtn-bwsc-jkm</span></td>
+                  <td class="m">Hôm qua 14:00</td><td class="m">58:41</td><td class="m">342</td><td class="m">51</td><td class="m">62,8 MB</td>
+                  <td><span class="iconbtn danger">✕</span></td>
+                </tr>
+                <tr>
+                  <td><b>Daily standup</b><br><span class="mono" style="font-size:11.5px;color:var(--text-3)">dvh-arqp-lze</span></td>
+                  <td class="m">27.07 09:05</td><td class="m">12:20</td><td class="m">64</td><td class="m">3</td><td class="m">4,1 MB</td>
+                  <td><span class="iconbtn danger">✕</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="btnrow" style="max-width:320px">
+            <button class="btn">Tải toàn bộ</button>
+            <button class="btn danger">Xoá tất cả bản ghi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="caption">Trang cài đặt · bốn nhóm trong sáu nhóm</p>
+  </section>
+
+  <section id="chu">
+    <div class="sechead">
+      <span class="num">08 — Chữ hiển thị</span>
+      <h2>Bộ chữ</h2>
+      <p class="note">
+        Chốt trước để không phải nghĩ lúc code. Quy tắc: nói chuyện gì vừa xảy ra, và nếu hỏng thì chỉ luôn cách sửa. Không xin lỗi, không nói mơ hồ.
+      </p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Khoá</th><th>Chữ hiện ra</th><th>Xuất hiện ở đâu</th></tr></thead>
+        <tbody>
+          <tr><td class="k">state.idle</td><td>Bạn chưa ở trong Google Meet</td><td class="m">popup</td></tr>
+          <tr><td class="k">state.lobby</td><td>Đang chờ bạn vào họp</td><td class="m">popup + HUD</td></tr>
+          <tr><td class="k">state.rec</td><td>Đang ghi</td><td class="m">popup + HUD + badge</td></tr>
+          <tr><td class="k">state.paused</td><td>Tạm dừng</td><td class="m">popup + HUD</td></tr>
+          <tr><td class="k">state.ended</td><td>Họp xong · {thời lượng}</td><td class="m">popup</td></tr>
+          <tr><td class="k">toast.autostart</td><td>Đã vào họp — bắt đầu ghi</td><td class="m">HUD</td></tr>
+          <tr><td class="k">toast.ccOn</td><td>Đã tự bật phụ đề</td><td class="m">HUD</td></tr>
+          <tr><td class="k">toast.ccLang</td><td>Meet đang hỏi chọn ngôn ngữ phụ đề. Chọn giúp một lần, những lần sau tiện ích tự bật.</td><td class="m">HUD (có nút)</td></tr>
+          <tr><td class="k">toast.ccFail</td><td>Chưa bật được phụ đề. Bấm nút CC trên thanh Meet, phần ghi lời sẽ tự nối vào.</td><td class="m">HUD</td></tr>
+          <tr><td class="k">toast.captured</td><td>Đã chụp ảnh #{id}</td><td class="m">HUD</td></tr>
+          <tr><td class="k">toast.stopped</td><td>Đã rời họp — dừng ghi. Bản ghi đã lưu: {lượt} lượt nói, {ảnh} ảnh.</td><td class="m">HUD</td></tr>
+          <tr><td class="k">warn.lowRes</td><td>Mở to phần trình bày để ảnh nét hơn</td><td class="m">chân HUD, khi luồng &lt; 1000px</td></tr>
+          <tr><td class="k">warn.throttle</td><td>Tab đang chạy nền nên Chrome giảm nhịp chụp. Quay lại tab này để chụp đủ.</td><td class="m">HUD</td></tr>
+          <tr><td class="k">warn.selector</td><td>Meet vừa đổi giao diện nên không tìm thấy vùng phụ đề. Ảnh vẫn được chụp bình thường.</td><td class="m">HUD</td></tr>
+          <tr><td class="k">err.canvas</td><td>Trình duyệt chặn đọc khung hình video nên không chụp được ảnh.</td><td class="m">HUD</td></tr>
+          <tr><td class="k">empty.turns</td><td>Chưa có lời nào. Phụ đề đã bật rồi, chờ có người nói.</td><td class="m">popup</td></tr>
+          <tr><td class="k">hist.empty</td><td>Chưa có bản ghi nào. Vào một cuộc họp là tiện ích tự lưu.</td><td class="m">popup · lịch sử</td></tr>
+          <tr><td class="k">hist.hint</td><td>Bấm vào bản ghi để chép</td><td class="m">popup · lịch sử</td></tr>
+          <tr><td class="k">hist.copying</td><td>Đang nén ảnh {n}/{tổng}</td><td class="m">hàng đang chép</td></tr>
+          <tr><td class="k">hist.copied</td><td>Đã chép {lượt} lượt · {ảnh} ảnh · {cỡ}</td><td class="m">hàng vừa chép, 3 giây</td></tr>
+          <tr><td class="k">hist.tooBig</td><td>Bản ghi {cỡ} quá lớn để chép — đang tải file .md</td><td class="m">hàng trong lịch sử</td></tr>
+          <tr><td class="k">hist.resumed</td><td>Ghi tiếp bản ghi cũ. Đã có {lượt} lượt nói và {ảnh} ảnh của phòng này.</td><td class="m">HUD, lúc vào lại</td></tr>
+          <tr><td class="k">hist.renamed</td><td>✎ mở ô sửa tên ngay trên hàng, Enter để lưu</td><td class="m">popup · lịch sử</td></tr>
+          <tr><td class="k">hist.otherTab</td><td>Cuộc họp này đang được ghi ở tab khác.</td><td class="m">HUD</td></tr>
+          <tr><td class="k">hist.deleteTitle</td><td>Xoá bản ghi này?</td><td class="m">hộp xác nhận</td></tr>
+          <tr><td class="k">hist.deleteBody</td><td>{mã} · {tên}<br>{lượt} lượt nói · {ảnh} ảnh · {cỡ}<br>Không khôi phục lại được. Nếu cần giữ, hãy chép hoặc tải file trước.</td><td class="m">hộp xác nhận</td></tr>
+          <tr><td class="k">hist.deleteOk</td><td>Xoá bản ghi</td><td class="m">nút đỏ trong hộp xác nhận</td></tr>
+          <tr><td class="k">hist.deleted</td><td>Đã xoá {mã}</td><td class="m">popup</td></tr>
+          <tr><td class="k">hist.pruned</td><td>Đã dọn ảnh của {n} bản ghi cũ để lấy chỗ. Phần chữ vẫn còn.</td><td class="m">popup</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="rui-ro">
+    <div class="sechead">
+      <span class="num">09 — Ràng buộc</span>
+      <h2>Những điều thiết kế phải né trước</h2>
+      <p class="note">Bốn thứ này ảnh hưởng trực tiếp tới giao diện, không phải chuyện thuần kỹ thuật để tính sau.</p>
+    </div>
+    <div class="risks">
+      <div class="risk" data-sev="cao">
+        <span class="rsev">Cao</span>
+        <div class="rbody">
+          <b>Tab nền bị Chrome bóp nhịp timer</b>
+          <p>Sau 5 phút ở nền, <code>setInterval</code> bị dồn về 1 lần/phút — vòng chụp 1 giây sẽ hỏng. Tab Meet đang phát tiếng thì được miễn, nhưng lúc tắt loa hoặc không ai nói thì không chắc.</p>
+          <p class="fix">Đo độ trôi mỗi nhịp; lệch quá 2 lần thì hạ xuống chế độ chỉ ghi phụ đề và hiện <code>warn.throttle</code> trên HUD. Không im lặng bỏ ảnh.</p>
+        </div>
+      </div>
+      <div class="risk" data-sev="cao">
+        <span class="rsev">Cao</span>
+        <div class="rbody">
+          <b>Class của Meet đổi bất cứ lúc nào</b>
+          <p><code>.vNKgIf.UDinHf</code>, <code>jsname="RrG0hf"</code> đều là chuỗi băm, có thể chết sau một lần Google cập nhật.</p>
+          <p class="fix">Gom hết vào <code>selectors.js</code>, mỗi tín hiệu ba lớp: ligature icon → vai trò ARIA → class băm. Có bộ tự kiểm khi vào họp, hỏng thì báo <code>warn.selector</code> chứ không đứng hình.</p>
+        </div>
+      </div>
+      <div class="risk" data-sev="cao">
+        <span class="rsev">Cao</span>
+        <div class="rbody">
+          <b>Cùng một mã phòng, nhiều buổi họp khác nhau</b>
+          <p>Đã chốt khoá bản ghi là mã phòng, nên cuộc họp định kỳ dùng lại mã sẽ dồn mọi buổi vào một bản ghi. Đánh đổi có ý thức: tải lại trang không bao giờ làm gãy bản ghi.</p>
+          <p class="fix">Mốc giờ là thời gian nội dung cộng dồn theo từng đoạn nên timeline không nhảy; chống trùng lời bằng chính hàm <code>merge()</code>. Muốn tách theo ngày thì đổi khoá thành <code>${code}#${ngày}</code> — một dòng trong <code>openSession</code>. Chi tiết ở mục 06.</p>
+        </div>
+      </div>
+      <div class="risk" data-sev="vừa">
+        <span class="rsev">Vừa</span>
+        <div class="rbody">
+          <b>Chép bản ghi lớn làm treo clipboard</b>
+          <p>Nén ảnh mất vài giây nên cử chỉ bấm hết hiệu lực, <code>writeText</code> ném “Document is not focused”. Mà kể cả chép được thì chuỗi base64 sáu chục megabyte cũng làm treo chỗ dán.</p>
+          <p class="fix">Đưa <code>Promise</code> vào <code>ClipboardItem</code> ngay lúc bấm để giữ cử chỉ; nén sẵn bản 512px từ lúc chụp; vượt 20 MB thì tự chuyển sang tải <code>.zip</code> và nói rõ lý do.</p>
+        </div>
+      </div>
+      <div class="risk" data-sev="vừa">
+        <span class="rsev">Vừa</span>
+        <div class="rbody">
+          <b>Ảnh gốc phình bộ nhớ</b>
+          <p>Bản script giữ blob 1280px trong RAM. Họp hai tiếng với slide đổi liên tục dễ vượt vài trăm MB, tab đầy thì mất trắng.</p>
+          <p class="fix">Ghi blob vào IndexedDB ngay khi chụp, RAM chỉ giữ thumbnail. Popup và trang cài đặt hiện dung lượng thật, kèm hạn tự xoá 7 ngày.</p>
+        </div>
+      </div>
+      <div class="risk" data-sev="vừa">
+        <span class="rsev">Vừa</span>
+        <div class="rbody">
+          <b>Đang ghi lời người khác</b>
+          <p>Đây là lý do HUD không có nút ẩn hẳn và popup luôn nói rõ dữ liệu nằm trong máy.</p>
+          <p class="fix">Chấm đỏ luôn hiện khi ghi. Không có quyền <code>host_permissions</code> nào ngoài meet.google.com, không có <code>fetch</code> ra ngoài — nêu thẳng ở mục “Về tiện ích”.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="token">
+    <div class="sechead">
+      <span class="num">10 — Bộ mã</span>
+      <h2>Màu, chữ, và cấu trúc file</h2>
+    </div>
+
+    <div class="swatches">
+      <div class="swatch"><div class="chipc" style="background:#e8a33d"></div><div class="meta"><b>Tín hiệu</b><span>#E8A33D · hổ phách</span></div></div>
+      <div class="swatch"><div class="chipc" style="background:#35b3a5"></div><div class="meta"><b>Kênh ảnh</b><span>#35B3A5 · teal</span></div></div>
+      <div class="swatch"><div class="chipc" style="background:#e0464b"></div><div class="meta"><b>Đang ghi</b><span>#E0464B · đỏ</span></div></div>
+      <div class="swatch"><div class="chipc" style="background:#0e1113"></div><div class="meta"><b>Nền tối</b><span>#0E1113</span></div></div>
+      <div class="swatch"><div class="chipc" style="background:#eceeed"></div><div class="meta"><b>Nền sáng</b><span>#ECEEED</span></div></div>
+    </div>
+
+    <p class="note" style="margin:18px 0 14px">
+      Hổ phách chỉ dùng cho một việc: <b>ngưỡng và tiêu điểm</b>. Teal chỉ dành cho kênh ảnh. Đỏ chỉ dành cho trạng thái đang ghi và lỗi.
+      Chữ tiêu đề dùng Bahnschrift (có sẵn trên Windows, lùi về DIN Alternate rồi Segoe UI Semibold), thân dùng Segoe UI,
+      mọi con số và mã dùng mono canh cột.
+    </p>
+
+    <pre class="tree"><b>extension/</b>
+├── manifest.json          <em>MV3 · matches: https://meet.google.com/*</em>
+├── <b>content/</b>              <em>script thường, chung namespace window.__MC (isolated world)</em>
+│   ├── selectors.js       <em>toàn bộ selector Meet, ba lớp dự phòng</em>
+│   ├── captions.js        <em>đọc và gộp lượt nói · merge() từ idea.js</em>
+│   ├── frames.js          <em>signature · dhash · ba tầng lọc chụp</em>
+│   ├── cc-toggle.js       <em>chuỗi tự bật phụ đề có xác minh (mục 04)</em>
+│   ├── hud.js             <em>HUD trong Shadow DOM, CSS nội tuyến</em>
+│   └── detector.js        <em>máy trạng thái · nhạc trưởng · bản sao DEFAULTS</em>
+├── <b>background/</b>
+│   └── service-worker.js  <em>chủ sở hữu IndexedDB · badge · trọng tài giữa các tab</em>
+├── <b>lib/</b>                  <em>ES module, dùng chung cho SW / popup / options / preview</em>
+│   ├── db.js              <em>IndexedDB gốc tiện ích: sessions · turns · frames · segments · prune</em>
+│   ├── markdown.js        <em>markdown tự chứa, ảnh base64</em>
+│   ├── settings.js        <em>DEFAULTS bản gốc · chrome.storage.sync</em>
+│   └── format.js          <em>mmss · bytes · whenLabel · tên file</em>
+├── <b>popup/</b>   hai thẻ: Cuộc họp này · Lịch sử
+├── <b>options/</b> cài đặt
+├── <b>preview/</b> trang xem trước, mở ở tab riêng
+├── <b>ui/</b>tokens.css       <em>bộ mã màu và chữ dùng chung</em>
+└── <b>icons/</b>  16 · 32 · 48 · 128</pre>
+  </section>
+
+  <footer>
+    <span>MeetCap · bản thiết kế giao diện v0.1 · 29.07.2026</span>
+    <span>Nguồn: idea.js v7 — 674 dòng</span>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var tabs = document.querySelectorAll('[data-hud]');
+    var views = document.querySelectorAll('[data-hud-view]');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) { t.setAttribute('aria-selected', String(t === tab)); });
+        views.forEach(function (v) { v.hidden = v.getAttribute('data-hud-view') !== tab.getAttribute('data-hud'); });
+      });
+    });
+  })();
+</script>
+
+</html>

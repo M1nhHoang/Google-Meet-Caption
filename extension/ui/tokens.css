@@ -1,0 +1,119 @@
+/* Shared tokens for the popup, options page and preview page.
+   Amber is only for thresholds and focus. Teal is only for the image channel.
+   Red is only for the recording state and errors. */
+
+:root {
+  --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, "Helvetica Neue", Arial, sans-serif;
+  --display: "Bahnschrift", "DIN Alternate", "Segoe UI Semibold", var(--sans);
+  --mono: "Cascadia Mono", ui-monospace, "SF Mono", Consolas, "Liberation Mono", monospace;
+
+  --bg: #eceeed;
+  --surface: #ffffff;
+  --surface-2: #f4f6f5;
+  --surface-3: #e6eae8;
+  --line: #d4dad8;
+  --line-soft: #e2e7e5;
+  --text: #14181a;
+  --text-2: #566360;
+  --text-3: #8a938f;
+
+  --amber: #b3771a;
+  --amber-bright: #e8a33d;
+  --amber-wash: #f7ecd9;
+  --teal: #157a70;
+  --teal-bright: #35b3a5;
+  --teal-wash: #dcefec;
+  --red: #c22a2f;
+  --red-bright: #e0464b;
+  --red-wash: #f7e2e2;
+
+  --r-sm: 5px;
+  --r-md: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1113;
+    --surface: #16191b;
+    --surface-2: #1c2124;
+    --surface-3: #232a2d;
+    --line: #2b3235;
+    --line-soft: #21272a;
+    --text: #e7ebe9;
+    --text-2: #9ba4a1;
+    --text-3: #6c7673;
+
+    --amber: #e8a33d;
+    --amber-bright: #f0b559;
+    --amber-wash: #2a2216;
+    --teal: #35b3a5;
+    --teal-bright: #4fc9bb;
+    --teal-wash: #142826;
+    --red: #e0464b;
+    --red-bright: #ec6165;
+    --red-wash: #2b1719;
+  }
+}
+
+* { box-sizing: border-box; }
+
+/* The hidden attribute relies on the UA stylesheet's display:none, which any display
+   rule of ours outranks. Pin it down once, here. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 13px/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.dot {
+  width: 7px; height: 7px; border-radius: 50%; flex: none;
+  background: var(--red-bright); display: inline-block;
+}
+.dot.blink { animation: mcPulse 1.6s ease-in-out infinite; }
+.dot.grey { background: var(--text-3); }
+.dot.amber { background: var(--amber-bright); }
+.dot.teal { background: var(--teal-bright); }
+@keyframes mcPulse { 0%,100% { opacity: 1 } 50% { opacity: .32 } }
+@media (prefers-reduced-motion: reduce) { .dot.blink { animation: none } }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font: 600 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+  padding: 5px 8px; border-radius: 100px;
+  background: var(--surface-3); color: var(--text-2);
+}
+.pill.rec { background: var(--red-wash); color: var(--red); }
+.pill.pause { background: var(--amber-wash); color: var(--amber); }
+.pill.wait { background: var(--teal-wash); color: var(--teal); }
+
+.btn {
+  font: 500 12.5px/1 var(--sans);
+  padding: 9px 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
+  cursor: pointer; white-space: nowrap; flex: 1; text-align: center;
+}
+.btn:hover { border-color: var(--text-3); }
+.btn:focus-visible { outline: 2px solid var(--amber-bright); outline-offset: 2px; }
+.btn[disabled] { opacity: .45; cursor: default; }
+.btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 600; }
+.btn.amber { background: var(--amber-bright); color: #1a1207; border-color: var(--amber-bright); font-weight: 600; }
+.btn.danger { color: var(--red); border-color: color-mix(in srgb, var(--red) 35%, var(--line)); background: transparent; }
+.btn.solid-danger { background: var(--red); border-color: var(--red); color: #fff; font-weight: 600; }
+
+.btnrow { display: flex; gap: 7px; }
+
+.iconbtn {
+  width: 28px; height: 28px; border-radius: 5px;
+  border: 1px solid var(--line); background: var(--surface);
+  color: var(--text-2); font: 500 12px/1 var(--mono);
+  display: grid; place-items: center; cursor: pointer; flex: none;
+}
+.iconbtn:hover { border-color: var(--text-3); color: var(--text); }
+.iconbtn:focus-visible { outline: 2px solid var(--amber-bright); outline-offset: 1px; }
+.iconbtn.danger { color: var(--red); border-color: color-mix(in srgb, var(--red) 32%, var(--line)); }

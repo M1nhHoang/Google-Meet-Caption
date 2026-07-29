@@ -1,0 +1,118 @@
+body { width: 360px; }
+
+.p-head {
+  display: flex; align-items: center; gap: 9px;
+  padding: 12px 14px; border-bottom: 1px solid var(--line-soft);
+  background: var(--surface);
+}
+.p-head .wordmark { font: 600 14px/1 var(--display); letter-spacing: .04em; }
+.p-head .code { font-size: 11.5px; color: var(--text-3); }
+.spacer { flex: 1; }
+
+.ptabs { display: flex; padding: 0 14px; background: var(--surface); border-bottom: 1px solid var(--line-soft); }
+.ptab {
+  font: 500 12.5px/1 var(--sans); color: var(--text-3);
+  padding: 11px 2px; margin-right: 18px; cursor: pointer;
+  background: none; border: 0; border-bottom: 2px solid transparent;
+}
+.ptab:hover { color: var(--text-2); }
+.ptab.cur { color: var(--text); font-weight: 600; border-bottom-color: var(--amber-bright); }
+.ptab:focus-visible { outline: 2px solid var(--amber-bright); outline-offset: -2px; }
+
+.p-body { padding: 14px; display: flex; flex-direction: column; gap: 14px; background: var(--surface); }
+.p-body > div { display: flex; flex-direction: column; gap: 14px; }
+
+.tiles {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px;
+  background: var(--line-soft); border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm); overflow: hidden;
+}
+.tile { background: var(--surface); padding: 10px 11px; display: flex; flex-direction: column; gap: 4px; }
+.tile b { font: 600 21px/1 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.tile b.teal { color: var(--teal); }
+.tile span { font: 500 9.5px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; color: var(--text-3); }
+
+.pmeter { display: flex; flex-direction: column; gap: 6px; }
+.pmeter-top { display: flex; justify-content: space-between; align-items: baseline; }
+.pmeter-top span { font: 500 9.5px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; color: var(--text-3); }
+.pmeter-top b { font: 600 12px/1 var(--mono); font-variant-numeric: tabular-nums; }
+.pmeter-track { position: relative; height: 8px; border-radius: 2px; background: var(--surface-3); }
+.pmeter-fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--teal); transition: width .2s linear; }
+.pmeter-fill.hot { background: var(--amber-bright); }
+.pmeter-thresh { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber-bright); }
+
+.hint { margin: 0; font-size: 11.5px; line-height: 1.45; color: var(--text-3); }
+.hint:empty { display: none; }
+.hint.warn { color: var(--amber); }
+
+.transcript { display: flex; flex-direction: column; gap: 8px; }
+.transcript:empty { display: none; }
+.tline { display: flex; gap: 9px; align-items: flex-start; }
+.tline .tt { font: 500 11px/1.5 var(--mono); color: var(--text-3); flex: none; }
+.tline .tx { font-size: 12.5px; line-height: 1.45; color: var(--text-2); }
+.tline .tx b { color: var(--text); font-weight: 600; }
+
+.empty { display: flex; flex-direction: column; gap: 9px; padding: 14px 0 2px; }
+.empty.tight { padding: 2px 0 0; }
+.empty h3 { margin: 0; font: 600 16px/1.25 var(--display); }
+.empty p { margin: 0; font-size: 12.5px; color: var(--text-2); line-height: 1.5; }
+
+.checklist { display: flex; flex-direction: column; gap: 8px; }
+.ck { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--text-2); }
+.ck i { font-style: normal; font: 600 11px/1 var(--mono); color: var(--teal); flex: none; width: 14px; }
+.ck i.off { color: var(--text-3); }
+.ck em { font-style: normal; font-family: var(--mono); font-size: 11.5px; color: var(--text-3); }
+
+/* ---------- history ---------- */
+.hhint {
+  font: 500 10px/1 var(--mono); letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text-3);
+}
+.hist { display: flex; flex-direction: column; gap: 8px; }
+.hrow {
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  background: var(--surface-2); padding: 10px 11px;
+  display: flex; gap: 10px; align-items: flex-start;
+  cursor: pointer; text-align: left;
+}
+.hrow:hover { border-color: var(--text-3); }
+.hrow:focus-visible { outline: 2px solid var(--amber-bright); outline-offset: 1px; }
+.hrow.live { border-color: color-mix(in srgb, var(--red) 38%, var(--line)); }
+.hrow.hot { border-color: var(--teal); background: var(--teal-wash); }
+.hmain { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.hcode { display: flex; align-items: center; gap: 7px; font: 600 11.5px/1 var(--mono); color: var(--text-2); }
+.htitle { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hmeta { font: 500 11px/1.45 var(--mono); color: var(--text-3); }
+.hacts { display: flex; gap: 4px; flex: none; }
+.hstatus:empty { display: none; }
+.hprog { display: flex; align-items: center; gap: 9px; font: 500 11px/1 var(--mono); color: var(--teal); padding-top: 3px; }
+.hprog .bar { flex: 1; height: 3px; border-radius: 2px; background: var(--surface-3); position: relative; overflow: hidden; }
+.hprog .bar i { position: absolute; inset: 0 auto 0 0; background: var(--teal); border-radius: 2px; transition: width .15s linear; }
+.hdone { font: 600 11px/1 var(--mono); color: var(--teal); padding-top: 3px; }
+.hfail { font: 600 11px/1.4 var(--mono); color: var(--amber); padding-top: 3px; }
+
+.rename { display: flex; gap: 6px; align-items: center; }
+.rename input {
+  flex: 1; min-width: 0; font: 500 13px/1 var(--sans);
+  padding: 7px 8px; border-radius: 4px;
+  border: 1px solid var(--amber-bright); background: var(--surface); color: var(--text);
+}
+.rename input:focus { outline: none; }
+
+.confirm {
+  border: 1px solid color-mix(in srgb, var(--red) 32%, var(--line));
+  border-radius: var(--r-sm); background: var(--red-wash);
+  padding: 13px; display: flex; flex-direction: column; gap: 10px;
+}
+.confirm b { font-size: 13.5px; font-weight: 600; }
+.confirm .cmeta { font: 500 11.5px/1.45 var(--mono); color: var(--text-2); }
+.confirm p { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-2); }
+
+.p-foot {
+  padding: 10px 14px; border-top: 1px solid var(--line-soft);
+  display: flex; align-items: center; gap: 10px;
+  font: 500 11px/1 var(--mono); color: var(--text-3);
+  background: var(--surface);
+}
+.p-foot a { color: var(--text-2); text-decoration: none; border-bottom: 1px solid var(--line); }
+.p-foot a:hover { color: var(--text); }

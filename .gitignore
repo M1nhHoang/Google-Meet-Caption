@@ -1,0 +1,16 @@
+# Dữ liệu họp thật — biên bản có tên và lời của người khác, ảnh là slide nội bộ.
+# Không đưa lên repo. Muốn thêm ví dụ thì tạo file mẫu đã ẩn danh.
+/images/
+/*.md
+!/README.md
+
+# Chỗ tiện ích xuất ra khi chạy
+*.b64.md
+meet-*.md
+meet-*.zip
+meet-*.json
+
+# Rác hệ thống
+Thumbs.db
+desktop.ini
+.DS_Store

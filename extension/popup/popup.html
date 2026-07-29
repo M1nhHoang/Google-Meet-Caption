@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>MeetCap</title>
+  <link rel="stylesheet" href="../ui/tokens.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="p-head">
+    <span class="wordmark">MeetCap</span>
+    <span class="code mono" id="code"></span>
+    <span class="spacer"></span>
+    <span class="pill" id="statePill">Nghỉ</span>
+  </div>
+
+  <div class="ptabs" role="tablist">
+    <button class="ptab cur" role="tab" data-tab="live" aria-selected="true">Cuộc họp này</button>
+    <button class="ptab" role="tab" data-tab="hist" aria-selected="false">Lịch sử</button>
+  </div>
+
+  <!-- ================= tab 1: current meeting ================= -->
+  <section class="p-body" id="paneLive">
+
+    <!-- waiting: one view for both "not on Meet yet" and "in the lobby" -->
+    <div id="viewWaiting" hidden>
+      <div class="empty">
+        <h3 id="waitTitle">Đang chờ cuộc họp</h3>
+        <p id="waitBody">Vào một cuộc họp Google Meet là tiện ích tự ghi. Không cần mở lại cửa sổ này.</p>
+      </div>
+      <div class="checklist" id="checklist"></div>
+      <div class="btnrow">
+        <button class="btn" id="btnOpenMeet" hidden>Mở Google Meet</button>
+        <button class="btn amber" id="btnReloadTab" hidden>Kết nối lại</button>
+        <button class="btn" id="btnSettings1">Cài đặt</button>
+      </div>
+    </div>
+
+    <!-- recording / paused -->
+    <div id="viewLive" hidden>
+      <div class="tiles">
+        <span class="tile"><b id="lvTurns">0</b><span>Lượt nói</span></span>
+        <span class="tile"><b class="teal" id="lvFrames">0</b><span>Ảnh</span></span>
+        <span class="tile"><b id="lvElapsed">0:00</b><span>Thời lượng</span></span>
+      </div>
+
+      <div class="pmeter">
+        <div class="pmeter-top"><span id="lvMeterLabel">Δ khung hình</span><b id="lvDelta">0,0 %</b></div>
+        <div class="pmeter-track">
+          <div class="pmeter-fill" id="lvFill" style="width:0%"></div>
+          <div class="pmeter-thresh" id="lvThresh" style="left:50%"></div>
+        </div>
+      </div>
+
+      <p class="hint" id="lvNote"></p>
+
+      <div class="transcript" id="lvRecent"></div>
+
+      <div class="btnrow">
+        <button class="btn amber" id="btnCapture">Chụp ngay</button>
+        <button class="btn" id="btnPause">Tạm dừng</button>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="btnDownloadLive">Tải .md</button>
+        <button class="btn primary" id="btnCopyLive">Sao chép</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ================= tab 2: history ================= -->
+  <section class="p-body" id="paneHist" hidden>
+    <div class="hhint">
+      <span>Bấm vào bản ghi để chép markdown</span>
+    </div>
+    <div class="hist" id="histList"></div>
+  </section>
+
+  <div class="p-foot">
+    <span id="footLeft"></span>
+    <span class="spacer"></span>
+    <a href="#" id="footRight">Cài đặt</a>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

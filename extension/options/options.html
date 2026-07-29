@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MeetCap — Cài đặt</title>
+  <link rel="stylesheet" href="../ui/tokens.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+<div class="shell">
+  <nav class="opt-nav">
+    <span class="brand"><b>MeetCap</b><span id="ver">v0.1.0</span></span>
+    <a href="#auto" class="cur">Tự động hoá</a>
+    <a href="#capture">Ngưỡng chụp ảnh</a>
+    <a href="#quality">Chất lượng ảnh</a>
+    <a href="#data">Dữ liệu đã lưu</a>
+    <a href="#about">Về tiện ích</a>
+  </nav>
+
+  <main class="opt-main">
+
+    <section class="opt-sec" id="auto">
+      <h3>Tự động hoá</h3>
+      <p class="note">Quyết định tiện ích được tự làm gì khi bạn vào một cuộc họp.</p>
+
+      <label class="field">
+        <span class="fl"><b>Tự ghi khi vào họp</b><span>Bắt đầu ngay khi phát hiện bạn đã vào trong cuộc gọi</span></span>
+        <input type="checkbox" class="knob" data-key="autoRecord">
+      </label>
+      <label class="field">
+        <span class="fl"><b>Tự bật phụ đề</b><span>Bấm nút CC giúp bạn, có kiểm tra lại để không lỡ tay tắt phụ đề bạn đang bật</span></span>
+        <input type="checkbox" class="knob" data-key="autoCaption">
+      </label>
+      <label class="field">
+        <span class="fl"><b>Giữ phụ đề luôn bật</b><span>Bật lại đúng một lần nếu phụ đề bị tắt giữa chừng</span></span>
+        <input type="checkbox" class="knob" data-key="keepCaptionOn">
+      </label>
+      <label class="field">
+        <span class="fl"><b>Chụp ảnh khi hình đổi</b><span>Tắt thì chỉ ghi phụ đề, không chụp gì</span></span>
+        <input type="checkbox" class="knob" data-key="captureEnabled">
+      </label>
+      <div class="field">
+        <span class="fl"><b>Bỏ qua các phòng này</b><span>Mỗi dòng một mã phòng — tiện ích sẽ nằm im</span></span>
+        <textarea rows="3" data-key="skipCodes" placeholder="abc-defg-hij"></textarea>
+      </div>
+    </section>
+
+    <section class="opt-sec" id="capture">
+      <h3>Ngưỡng chụp ảnh</h3>
+      <p class="note">Ba tầng lọc: đủ đổi thì mới xét, đứng yên thì mới chụp, trùng slide cũ thì bỏ.</p>
+
+      <label class="field">
+        <span class="fl"><b>Mức đổi tối thiểu</b><span>Dưới mức này coi là con trỏ chuột hoặc đồng hồ nhấp nháy</span></span>
+        <span class="slider">
+          <input type="range" data-key="minChangeRatio" min="0.005" max="0.3" step="0.005">
+          <output data-out="minChangeRatio"></output>
+        </span>
+      </label>
+      <label class="field">
+        <span class="fl"><b>Mức coi là đứng yên</b><span>Chờ khung hình hết chuyển động rồi mới bấm máy</span></span>
+        <span class="slider">
+          <input type="range" data-key="settleRatio" min="0.002" max="0.08" step="0.001">
+          <output data-out="settleRatio"></output>
+        </span>
+      </label>
+      <label class="field">
+        <span class="fl"><b>Sai lệch độ sáng</b><span>Chênh bao nhiêu (0–255) thì tính là một ô đã đổi</span></span>
+        <span class="slider">
+          <input type="range" data-key="pixelTol" min="2" max="40" step="1">
+          <output data-out="pixelTol"></output>
+        </span>
+      </label>
+      <label class="field">
+        <span class="fl"><b>Khoảng cách hash</b><span>Chống lưu lại slide đã có. Cao quá thì bỏ mất slide gần giống nhau</span></span>
+        <span class="slider">
+          <input type="range" data-key="threshold" min="0" max="16" step="1">
+          <output data-out="threshold"></output>
+        </span>
+      </label>
+      <label class="field">
+        <span class="fl"><b>Nhịp kiểm tra</b><span>Càng dày càng bắt kịp slide nhanh, càng tốn CPU</span></span>
+        <select data-key="watchMs">
+          <option value="500">500 ms</option>
+          <option value="1000">1000 ms</option>
+          <option value="2000">2000 ms</option>
+          <option value="3000">3000 ms</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="opt-sec" id="quality">
+      <h3>Chất lượng ảnh</h3>
+      <p class="callout">
+        <b>Ảnh mờ không đọc được chữ?</b>
+        Meet tự hạ độ phân giải luồng video theo kích thước ô đang hiển thị. Ô nhỏ thì luồng chỉ còn
+        640×360 và không có cách nào nén cho nét lại được. Muốn ảnh nét thì <b>ghim hoặc mở to phần
+        trình bày</b> — HUD trong trang hiện độ phân giải thật của mỗi ảnh để bạn kiểm tra ngay.
+      </p>
+
+      <label class="field">
+        <span class="fl"><b>Độ phân giải ảnh lưu</b><span>Slide có chữ thì thu nhỏ là mất chữ. Mặc định giữ nguyên luồng.</span></span>
+        <select data-key="exportMaxSide">
+          <option value="0">Giữ nguyên luồng video (nét nhất)</option>
+          <option value="1920">Tối đa 1920 px</option>
+          <option value="1600">Tối đa 1600 px</option>
+          <option value="1280">Tối đa 1280 px</option>
+          <option value="1024">Tối đa 1024 px</option>
+          <option value="512">Tối đa 512 px (nhẹ nhất)</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="fl"><b>Chặn trên</b><span>Màn hình 4K thì cắt bớt để một ảnh không thành vài megabyte</span></span>
+        <select data-key="captureHardCap">
+          <option value="1920">1920 px</option>
+          <option value="2560">2560 px</option>
+          <option value="3840">3840 px</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="fl"><b>Mức nén</b><span>Chữ trên slide cần mức cao. Dưới 0,80 là bắt đầu nhoè nét chữ.</span></span>
+        <span class="slider">
+          <input type="range" data-key="exportQuality" min="0.5" max="1" step="0.01">
+          <output data-out="exportQuality"></output>
+        </span>
+      </label>
+      <label class="field">
+        <span class="fl"><b>Định dạng</b><span>WebP nhỏ hơn JPEG ở cùng độ nét. PNG không mất nét nhưng nặng gấp nhiều lần.</span></span>
+        <select data-key="exportFormat">
+          <option value="image/webp">WebP</option>
+          <option value="image/jpeg">JPEG</option>
+          <option value="image/png">PNG (không nén mất nét)</option>
+        </select>
+      </label>
+      <p class="note" id="sizeHint"></p>
+    </section>
+
+    <section class="opt-sec" id="data">
+      <h3>Dữ liệu đã lưu</h3>
+      <p class="note">Tất cả nằm trong máy bạn. Tiện ích không có quyền gửi ra ngoài meet.google.com.</p>
+
+      <div class="usage">
+        <div class="usage-bar" id="usageBar"></div>
+        <div class="usage-key" id="usageKey"></div>
+      </div>
+
+      <label class="field">
+        <span class="fl"><b>Giữ bản ghi trong</b><span>Quá hạn thì xoá dần từ bản cũ nhất</span></span>
+        <select data-key="retentionDays">
+          <option value="0">Không tự xoá</option>
+          <option value="7">7 ngày</option>
+          <option value="30">30 ngày</option>
+          <option value="90">90 ngày</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="fl"><b>Hạn dung lượng</b><span>Chạm hạn thì dọn ảnh của bản ghi cũ nhất trước, phần chữ giữ lại</span></span>
+        <select data-key="maxBytes">
+          <option value="1073741824">1 GB</option>
+          <option value="2147483648">2 GB</option>
+          <option value="4294967296">4 GB</option>
+          <option value="10737418240">10 GB</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="fl"><b>Ngưỡng chuyển sang tải file</b><span>Bản ghi lớn hơn mức này thì tải .md thay vì chép, tránh treo chỗ dán</span></span>
+        <select data-key="copyMaxBytes">
+          <option value="10485760">10 MB</option>
+          <option value="26214400">25 MB</option>
+          <option value="52428800">50 MB</option>
+          <option value="209715200">200 MB</option>
+        </select>
+      </label>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Bản ghi</th><th>Bắt đầu</th><th>Dài</th><th>Lượt</th><th>Ảnh</th><th>Cỡ</th><th></th></tr>
+          </thead>
+          <tbody id="recTable"></tbody>
+        </table>
+      </div>
+      <div class="btnrow" style="max-width:340px">
+        <button class="btn" id="btnRefresh">Tải lại danh sách</button>
+        <button class="btn danger" id="btnClearAll">Xoá tất cả bản ghi</button>
+      </div>
+      <div id="clearConfirm"></div>
+    </section>
+
+    <section class="opt-sec" id="about">
+      <h3>Về tiện ích</h3>
+      <p class="note">
+        MeetCap chỉ chạy trên <span class="mono">meet.google.com</span>, không gọi ra máy chủ nào,
+        và không có quyền đọc trang nào khác. Phụ đề và ảnh nằm trong IndexedDB của tiện ích trên máy bạn.
+      </p>
+      <p class="note">
+        Tiện ích ghi lời của người khác trong phòng họp. Vì vậy khi đang ghi, HUD trong trang không
+        bao giờ ẩn hoàn toàn — chấm đỏ luôn hiện. Hãy cho những người trong phòng biết bạn đang ghi.
+      </p>
+      <p class="note">Nhân lõi phát hiện thay đổi và gộp phụ đề lấy từ <span class="mono">idea.js v7</span>.</p>
+    </section>
+
+  </main>
+</div>
+<div class="saved" id="saved" hidden>Đã lưu</div>
+<script type="module" src="options.js"></script>
+</body>
+</html>
