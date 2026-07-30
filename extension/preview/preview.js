@@ -1,6 +1,7 @@
 import { getSession, getTurns, getFrames, contentDuration } from "../lib/db.js";
 import { buildMarkdown } from "../lib/markdown.js";
-import { mmss, bytes, whenLabel, fileStamp, safeFileName } from "../lib/format.js";
+import { saveBundle, saveMarkdown } from "../lib/bundle.js";
+import { mmss, bytes, whenLabel } from "../lib/format.js";
 import { getSettings } from "../lib/settings.js";
 
 const $ = (id) => document.getElementById(id);
@@ -29,6 +30,7 @@ async function init() {
   render();
   $("btnCopy").addEventListener("click", copy);
   $("btnDownload").addEventListener("click", download);
+  $("btnZip").addEventListener("click", downloadZip);
 }
 
 function fail(msg) {
@@ -39,6 +41,7 @@ function fail(msg) {
   $("body").append(p);
   $("btnCopy").disabled = true;
   $("btnDownload").disabled = true;
+  $("btnZip").disabled = true;
 }
 
 async function render() {
@@ -145,16 +148,30 @@ async function copy() {
 }
 
 async function download() {
-  const text = buildMarkdown(session, turns, frames);
-  const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = safeFileName(
-    `${session.title || session.code}-${session.code}-${fileStamp(session.startedAt)}`
-  ) + ".md";
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  await saveMarkdown(session, turns, frames);
+}
+
+/* The .zip: the same transcript twice — one file linking images/, one with the pictures
+   embedded — plus the images as real files. Packing decodes every image out of base64,
+   so the button counts them off. */
+async function downloadZip() {
+  const btn = $("btnZip");
+  const old = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Đang gói…";
+  try {
+    const res = await saveBundle(session, turns, frames, {
+      onProgress: ({ step, done, total }) => {
+        if (step === "images" && total) btn.textContent = `Đang gói ảnh ${done}/${total}`;
+      },
+    });
+    btn.textContent = `✓ ${bytes(res.size)}`;
+  } catch (e) {
+    btn.textContent = "Không tải được";
+    console.warn("[MeetCap] zip failed", e);
+  } finally {
+    setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 3000);
+  }
 }
 
 init();

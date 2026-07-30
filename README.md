@@ -1,8 +1,9 @@
 # MeetCap
 
 A Chrome extension that records captions and captures slides in Google Meet. It starts
-itself when you join a call, keeps everything on your machine, and exports one
-self-contained markdown file with the images embedded.
+itself when you join a call, keeps everything on your machine, and exports either one
+self-contained markdown file with the images embedded, or a `.zip` holding the markdown
+next to an `images/` folder of real image files.
 
 The user interface is in Vietnamese; the code and docs are in English.
 
@@ -34,6 +35,8 @@ No build step, no dependencies.
   the existing recording instead of starting a second one
 - Leaving the call only stops the recording. It never downloads anything on its own
 - Click a recording in the History tab to copy it as markdown; rename and delete in place
+- Or download it as a `.zip` — markdown plus an `images/` folder it references, so the
+  pictures can be opened, edited and dragged around on their own
 
 ## Privacy
 

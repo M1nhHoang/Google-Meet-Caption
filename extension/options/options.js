@@ -2,6 +2,7 @@ import { DEFAULTS, getSettings, setSettings } from "../lib/settings.js";
 import {
   listSessions, deleteSession, deleteAll, usage, contentDuration,
 } from "../lib/db.js";
+import { downloadBundle } from "../lib/bundle.js";
 import { bytes, whenLabel, mmss } from "../lib/format.js";
 
 const $ = (id) => document.getElementById(id);
@@ -175,16 +176,52 @@ async function renderData() {
     });
 
     const tdAct = document.createElement("td");
+    const zip = document.createElement("button");
+    zip.className = "iconbtn wide";
+    zip.textContent = "zip";
+    zip.title = "Tải .zip — markdown kèm thư mục ảnh";
+    zip.setAttribute("aria-label", `Tải bản ghi ${s.code} dạng zip`);
+    zip.addEventListener("click", () => zipRow(s, zip));
+
     const del = document.createElement("button");
     del.className = "iconbtn danger";
     del.textContent = "✕";
     del.title = "Xoá bản ghi";
     del.setAttribute("aria-label", `Xoá bản ghi ${s.code}`);
     del.addEventListener("click", () => askDeleteRow(s, tr));
-    tdAct.append(del);
+
+    const acts = document.createElement("div");
+    acts.className = "acts";
+    acts.append(zip, del);
+    tdAct.append(acts);
 
     tr.append(tdName, ...cells, tdAct);
     tbody.append(tr);
+  }
+}
+
+/* Packing counts the images off on the button itself — the table has nowhere else to
+   put progress, and a big recording takes a few seconds. */
+async function zipRow(s, btn) {
+  btn.disabled = true;
+  const old = { text: btn.textContent, title: btn.title };
+  btn.textContent = "…";
+  try {
+    await downloadBundle(s.id, {
+      onProgress: ({ step, done, total }) => {
+        if (step === "images" && total) btn.textContent = `${done}/${total}`;
+      },
+    });
+    btn.textContent = "✓";
+  } catch (e) {
+    btn.textContent = "!";
+    btn.title = "Không tải được .zip: " + (e.message || e);
+  } finally {
+    setTimeout(() => {
+      btn.textContent = old.text;
+      btn.title = old.title;
+      btn.disabled = false;
+    }, 2500);
   }
 }
 

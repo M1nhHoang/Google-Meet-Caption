@@ -534,6 +534,10 @@
     display: grid; place-items: center;
   }
   .iconbtn.danger { color: var(--red); border-color: color-mix(in srgb, var(--red) 32%, var(--line)); }
+  .iconbtn.wide {
+    width: auto; padding: 0 7px;
+    font: 600 10px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase;
+  }
   .hprog { display: flex; align-items: center; gap: 9px; font: 500 11px/1 var(--mono); color: var(--teal); padding-top: 3px; }
   .hprog .bar { flex: 1; height: 3px; border-radius: 2px; background: var(--surface-3); position: relative; }
   .hprog .bar i { position: absolute; inset: 0 auto 0 0; background: var(--teal); border-radius: 2px; }
@@ -1103,6 +1107,7 @@ const ok = await waitFor(findCaptionRegion, 3000);</pre>
             </div>
             <div class="btnrow">
               <button class="btn">Tải .md</button>
+              <button class="btn">Tải .zip</button>
               <button class="btn primary">Sao chép</button>
             </div>
           </div>
@@ -1172,6 +1177,7 @@ const ok = await waitFor(findCaptionRegion, 3000);</pre>
             </div>
             <div class="btnrow">
               <button class="btn">Tải .md</button>
+              <button class="btn">Tải .zip</button>
               <button class="btn primary">Sao chép</button>
             </div>
           </div>
@@ -1193,7 +1199,7 @@ const ok = await waitFor(findCaptionRegion, 3000);</pre>
           </div>
           <div class="p-body">
             <div class="hhint">
-              <span>Bấm vào bản ghi để chép markdown</span>
+              <span>Bấm vào bản ghi để chép markdown · zip để tải kèm ảnh</span>
             </div>
             <div class="hist">
               <div class="hrow live">
@@ -1204,6 +1210,7 @@ const ok = await waitFor(findCaptionRegion, 3000);</pre>
                 </span>
                 <span class="hacts">
                   <span class="iconbtn">⧉</span>
+                  <span class="iconbtn wide">zip</span>
                   <span class="iconbtn">✎</span>
                   <span class="iconbtn danger">✕</span>
                 </span>
@@ -1218,6 +1225,7 @@ const ok = await waitFor(findCaptionRegion, 3000);</pre>
                 </span>
                 <span class="hacts">
                   <span class="iconbtn">⧉</span>
+                  <span class="iconbtn wide">zip</span>
                   <span class="iconbtn">✎</span>
                   <span class="iconbtn danger">✕</span>
                 </span>
@@ -1232,6 +1240,7 @@ const ok = await waitFor(findCaptionRegion, 3000);</pre>
                 </span>
                 <span class="hacts">
                   <span class="iconbtn">⧉</span>
+                  <span class="iconbtn wide">zip</span>
                   <span class="iconbtn">✎</span>
                   <span class="iconbtn danger">✕</span>
                 </span>
@@ -1245,6 +1254,7 @@ const ok = await waitFor(findCaptionRegion, 3000);</pre>
                 </span>
                 <span class="hacts">
                   <span class="iconbtn">⧉</span>
+                  <span class="iconbtn wide">zip</span>
                   <span class="iconbtn">✎</span>
                   <span class="iconbtn danger">✕</span>
                 </span>
@@ -1273,7 +1283,7 @@ const ok = await waitFor(findCaptionRegion, 3000);</pre>
           </div>
           <div class="p-body">
             <div class="hhint">
-              <span>Bấm vào bản ghi để chép markdown</span>
+              <span>Bấm vào bản ghi để chép markdown · zip để tải kèm ảnh</span>
             </div>
             <div class="hist">
               <div class="hrow dim">
@@ -1449,14 +1459,44 @@ at = baseOffset + (Date.now() − segmentStart)</pre>
   new ClipboardItem({ "text/plain": buildMarkdown(recordId) })   <em>// Promise&lt;Blob&gt;, giữ được cử chỉ bấm</em>
 ]);</pre>
     <p class="note" style="margin-top:14px">
-      Chỉ có <b>một định dạng duy nhất</b>: markdown tự chứa, ảnh nhúng base64. Không có ô chọn định dạng
-      ở đâu cả — bấm là chép markdown, hết.
+      Đường chính vẫn là <b>một định dạng duy nhất</b>: markdown tự chứa, ảnh nhúng base64. Không có ô chọn
+      định dạng ở đâu cả — bấm là chép markdown, hết.
     </p>
     <p class="note" style="margin-top:10px">
       Vẫn cần chặn trên: bản ghi vượt <b>25 MB</b> thì không chép nữa mà tự tải <code>.md</code> và nói rõ lý do —
       dán một chuỗi base64 sáu chục megabyte vào bất cứ đâu cũng làm treo trình soạn thảo. Ảnh nét thì mức
       này bị chạm nhanh hơn, nên ngưỡng chỉnh được trong cài đặt.
       Chép xong thì đổi màu hàng sang teal kèm số liệu vừa chép trong 3 giây, đủ để biết chắc là đã xong.
+    </p>
+
+    <h3 style="margin:34px 0 12px">Cửa thứ hai: tải <code>.zip</code></h3>
+    <p class="note" style="margin-bottom:14px">
+      Base64 tiện để dán nhưng khó làm việc: không mở được ảnh nào ra xem riêng, không kéo vào slide, và mọi
+      trình soạn markdown đều ì ra với một file 400 MB. Nên có thêm <b>một nút duy nhất</b> nữa —
+      <code>zip</code> — đóng cả bản ghi thành một gói, ảnh là file thật:
+    </p>
+    <pre class="tree">Họp kế hoạch quý 3-kqr-mfvd-xzt-2026-07-29-0915.zip
+└── kqr-mfvd-xzt-2026-07-29-0915/         <em>// tên thư mục lấy theo mã họp, không theo tiêu đề</em>
+    ├── Họp kế hoạch quý 3-…-0915.md      <em>// trỏ tới images/anh-001.webp</em>
+    └── images/
+        ├── anh-001.webp
+        └── anh-014.webp</pre>
+    <p class="note" style="margin-top:14px">
+      Cả bản ghi nằm trong <b>một thư mục</b> nên giải nén không rải file ra khắp Downloads, và đường dẫn
+      <code>images/…</code> là tương đối nên chuyển thư mục đi đâu ảnh vẫn còn. Trong gói
+      <b>không có bản base64</b>: dạng đó chỉ cách một cú bấm ở nút <b>Sao chép</b>, đóng kèm vào chỉ làm
+      file tải về nặng gấp đôi cùng một đoạn chữ.
+    </p>
+    <p class="note" style="margin-top:10px">
+      Tên thư mục trong gói lấy theo <b>mã họp</b> chứ không theo tiêu đề, và tên file bị cắt ở 64 ký tự:
+      Windows vẫn chặn đường dẫn dài quá 260 ký tự, mà Explorer thì giải nén vào một thư mục mang tên file
+      zip — để tiêu đề dài xuất hiện hai lần trong cùng một đường dẫn là <code>Expand-Archive</code> báo lỗi
+      thẳng. Gói nén tự viết trong <code>lib/zip.js</code>, không thêm thư viện: markdown thì deflate, ảnh
+      WebP thì lưu nguyên vì nén lại chỉ mất thời gian.
+    </p>
+    <p class="note" style="margin-top:10px">
+      Gói 50 ảnh mất khoảng một giây, nên hàng trong lịch sử đếm ảnh theo tiến độ
+      (<code>Đang gói ảnh 18/51</code>) giống lúc chép, và nút ở tab cuộc họp báo ngay trên nhãn của nó.
     </p>
   </section>
 
@@ -1616,17 +1656,17 @@ at = baseOffset + (Date.now() − segmentStart)</pre>
                 <tr>
                   <td><b>Họp kế hoạch quý 3</b><br><span class="mono" style="font-size:11.5px;color:var(--text-3)">kqr-mfvd-xzt</span></td>
                   <td class="m">Hôm nay 09:15</td><td class="m">42:17</td><td class="m">128</td><td class="m">14</td><td class="m">18,4 MB</td>
-                  <td><span class="iconbtn danger">✕</span></td>
+                  <td><span class="iconbtn wide">zip</span> <span class="iconbtn danger">✕</span></td>
                 </tr>
                 <tr>
                   <td><b>Review thiết kế tuần 30</b><br><span class="mono" style="font-size:11.5px;color:var(--text-3)">qtn-bwsc-jkm</span></td>
                   <td class="m">Hôm qua 14:00</td><td class="m">58:41</td><td class="m">342</td><td class="m">51</td><td class="m">62,8 MB</td>
-                  <td><span class="iconbtn danger">✕</span></td>
+                  <td><span class="iconbtn wide">zip</span> <span class="iconbtn danger">✕</span></td>
                 </tr>
                 <tr>
                   <td><b>Daily standup</b><br><span class="mono" style="font-size:11.5px;color:var(--text-3)">dvh-arqp-lze</span></td>
                   <td class="m">27.07 09:05</td><td class="m">12:20</td><td class="m">64</td><td class="m">3</td><td class="m">4,1 MB</td>
-                  <td><span class="iconbtn danger">✕</span></td>
+                  <td><span class="iconbtn wide">zip</span> <span class="iconbtn danger">✕</span></td>
                 </tr>
               </tbody>
             </table>
@@ -1670,10 +1710,13 @@ at = baseOffset + (Date.now() − segmentStart)</pre>
           <tr><td class="k">err.canvas</td><td>Trình duyệt chặn đọc khung hình video nên không chụp được ảnh.</td><td class="m">HUD</td></tr>
           <tr><td class="k">empty.turns</td><td>Chưa có lời nào. Phụ đề đã bật rồi, chờ có người nói.</td><td class="m">popup</td></tr>
           <tr><td class="k">hist.empty</td><td>Chưa có bản ghi nào. Vào một cuộc họp là tiện ích tự lưu.</td><td class="m">popup · lịch sử</td></tr>
-          <tr><td class="k">hist.hint</td><td>Bấm vào bản ghi để chép</td><td class="m">popup · lịch sử</td></tr>
+          <tr><td class="k">hist.hint</td><td>Bấm vào bản ghi để chép markdown · zip để tải kèm ảnh</td><td class="m">popup · lịch sử</td></tr>
           <tr><td class="k">hist.copying</td><td>Đang nén ảnh {n}/{tổng}</td><td class="m">hàng đang chép</td></tr>
           <tr><td class="k">hist.copied</td><td>Đã chép {lượt} lượt · {ảnh} ảnh · {cỡ}</td><td class="m">hàng vừa chép, 3 giây</td></tr>
           <tr><td class="k">hist.tooBig</td><td>Bản ghi {cỡ} quá lớn để chép — đang tải file .md</td><td class="m">hàng trong lịch sử</td></tr>
+          <tr><td class="k">hist.zipping</td><td>Đang gói ảnh {n}/{tổng}</td><td class="m">hàng đang tải zip</td></tr>
+          <tr><td class="k">hist.zipped</td><td>✓ Đã tải .zip · {ảnh} ảnh · {cỡ}</td><td class="m">hàng vừa tải, 4 giây</td></tr>
+          <tr><td class="k">hist.zipFail</td><td>Không tải được .zip: {lý do}</td><td class="m">hàng trong lịch sử</td></tr>
           <tr><td class="k">hist.resumed</td><td>Ghi tiếp bản ghi cũ. Đã có {lượt} lượt nói và {ảnh} ảnh của phòng này.</td><td class="m">HUD, lúc vào lại</td></tr>
           <tr><td class="k">hist.renamed</td><td>✎ mở ô sửa tên ngay trên hàng, Enter để lưu</td><td class="m">popup · lịch sử</td></tr>
           <tr><td class="k">hist.otherTab</td><td>Cuộc họp này đang được ghi ở tab khác.</td><td class="m">HUD</td></tr>
@@ -1778,7 +1821,9 @@ at = baseOffset + (Date.now() − segmentStart)</pre>
 │   └── service-worker.js  <em>chủ sở hữu IndexedDB · badge · trọng tài giữa các tab</em>
 ├── <b>lib/</b>                  <em>ES module, dùng chung cho SW / popup / options / preview</em>
 │   ├── db.js              <em>IndexedDB gốc tiện ích: sessions · turns · frames · segments · prune</em>
-│   ├── markdown.js        <em>markdown tự chứa, ảnh base64</em>
+│   ├── markdown.js        <em>hai dạng: ảnh base64 · ảnh trỏ vào images/</em>
+│   ├── zip.js             <em>trình đóng zip tự viết: crc32 · deflate-raw · tên UTF-8</em>
+│   ├── bundle.js          <em>gói .zip của một bản ghi · lưu file qua chrome.downloads</em>
 │   ├── settings.js        <em>DEFAULTS bản gốc · chrome.storage.sync</em>
 │   └── format.js          <em>mmss · bytes · whenLabel · tên file</em>
 ├── <b>popup/</b>   hai thẻ: Cuộc họp này · Lịch sử

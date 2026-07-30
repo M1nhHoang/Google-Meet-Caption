@@ -9,6 +9,8 @@
 meet-*.md
 meet-*.zip
 meet-*.json
+# Gói .zip xuất ra mang tên cuộc họp, không theo tiền tố nào
+/*.zip
 
 # Rác hệ thống
 Thumbs.db

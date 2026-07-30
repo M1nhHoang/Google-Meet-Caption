@@ -109,8 +109,10 @@ oldest recording's images and keeps its text**.
 
 ## Export
 
-A single format: **self-contained markdown** with base64 images, so a paste anywhere keeps
-the pictures.
+Two ways out, both one click.
+
+**Copy / `.md`** — **self-contained markdown** with base64 images, so a paste anywhere
+keeps the pictures.
 
 - Clicking a recording in the **History** tab copies it immediately
 - Past the threshold (25 MB by default) it downloads a `.md` file instead of copying,
@@ -125,11 +127,40 @@ To get the clean text without images:
 grep -v '^\[img-' file.md
 ```
 
+**`.zip`** — the `zip` button on a history row, `Tải .zip` on the current-meeting tab and
+the preview page, `zip` in the options table. Base64 is easy to paste but awkward to work
+with: no single image can be opened on its own, and a 400 MB markdown file bogs down every
+editor. The bundle is the transcript with the images as real files:
+
+```text
+Họp kế hoạch quý 3-kqr-mfvd-xzt-2026-07-29-0915.zip
+└── kqr-mfvd-xzt-2026-07-29-0915/
+    ├── Họp kế hoạch quý 3-…-0915.md   → images/anh-001.webp
+    └── images/anh-001.webp …
+```
+
+- One folder inside the archive, so unzipping never scatters files into Downloads, and the
+  relative `images/` links survive moving the folder
+- No base64 copy of the transcript in the bundle — that shape is one click away on the copy
+  button, and shipping the same text twice only doubles the download
+- The folder is named after the meeting **code**, and the document stem is capped at 64
+  characters. Windows still refuses paths over 260 characters and Explorer extracts into a
+  folder named after the `.zip`, so a long title would otherwise be paid for twice in one
+  path — `Expand-Archive` fails outright when it happens
+- `lib/zip.js` writes the archive: CRC-32, `CompressionStream("deflate-raw")` for the
+  markdown, stored as-is for the images (WebP does not deflate). No library, no build step
+- Bytes go into a `Blob` every 8 MB while packing, so the heap stays flat — 50 images of
+  500 KB pack in about a second and never hold more than a few MB of JS memory
+- No ZIP64: an archive stops at 4 GB and 65 535 entries, above the pruning cap. Past either,
+  it refuses with a message instead of writing a corrupt file
+
 ## Layout
 
 ```text
 manifest.json
 lib/            db.js · markdown.js · settings.js · format.js      (ES modules, shared)
+                zip.js                the ZIP writer, ~180 lines
+                bundle.js             one recording → one .zip, and saving files
 background/     service-worker.js    owns IndexedDB, badge, arbiter between tabs
 content/        selectors.js          everything that touches Meet's DOM, 3 fallback layers
                 captions.js           read and merge speaker turns

@@ -3,8 +3,9 @@ import {
   deleteSession, renameSession, contentDuration,
 } from "../lib/db.js";
 import { buildMarkdown } from "../lib/markdown.js";
+import { saveBundle, saveMarkdown } from "../lib/bundle.js";
 import { getSettings } from "../lib/settings.js";
-import { mmss, bytes, whenLabel, fileStamp, safeFileName } from "../lib/format.js";
+import { mmss, bytes, whenLabel } from "../lib/format.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -111,7 +112,14 @@ function wire() {
     const sid = currentSid();
     if (sid) copyFromButton(sid, $("btnCopyLive"));
   });
-  $("btnDownloadLive").addEventListener("click", () => downloadRecord(currentSid()));
+  $("btnDownloadLive").addEventListener("click", () => {
+    const sid = currentSid();
+    if (sid) saveFromButton(sid, $("btnDownloadLive"), "md");
+  });
+  $("btnZipLive").addEventListener("click", () => {
+    const sid = currentSid();
+    if (sid) saveFromButton(sid, $("btnZipLive"), "zip");
+  });
 }
 
 function openOptions() {
@@ -330,6 +338,7 @@ function historyRow(s) {
   acts.className = "hacts";
   acts.append(
     iconButton("⧉", "Sao chép markdown", (e) => { e.stopPropagation(); copyRecord(s.id, row); }),
+    iconButton("zip", "Tải .zip — markdown kèm thư mục ảnh", (e) => { e.stopPropagation(); zipRecord(s.id, row); }, "wide"),
     iconButton("✎", "Sửa tên", (e) => { e.stopPropagation(); startRename(s, row, title); }),
     iconButton("✕", "Xoá bản ghi", (e) => { e.stopPropagation(); askDelete(s, row); }, "danger")
   );
@@ -352,6 +361,21 @@ function iconButton(glyph, title, fn, extra = "") {
   return b;
 }
 
+/* ---------------- per-row status line ---------------- */
+
+/* Copy and zip both report into the row's own status line. Only numbers and fixed
+   strings ever reach innerHTML here — no recording title, no speaker name. */
+function statusSetter(rowEl) {
+  const status = rowEl?.querySelector(".hstatus");
+  return (html, cls) => {
+    if (!status) return;
+    status.className = "hstatus " + (cls || "");
+    status.innerHTML = html;
+  };
+}
+
+const progressBar = (pct) => `<span class="bar"><i style="width:${pct}%"></i></span>`;
+
 /* ---------------- copy ---------------- */
 
 /**
@@ -363,12 +387,7 @@ async function copyRecord(sid, rowEl) {
   if (!sid || state.busy.has(sid)) return;
   state.busy.add(sid);
 
-  const status = rowEl?.querySelector(".hstatus");
-  const setStatus = (html, cls) => {
-    if (!status) return;
-    status.className = "hstatus " + (cls || "");
-    status.innerHTML = html;
-  };
+  const setStatus = statusSetter(rowEl);
 
   try {
     const session = await getSession(sid);
@@ -386,7 +405,7 @@ async function copyRecord(sid, rowEl) {
       return;
     }
 
-    setStatus('<span class="bar"><i style="width:35%"></i></span>Đang dựng markdown…', "hprog");
+    setStatus(progressBar(35) + "Đang dựng markdown…", "hprog");
 
     let info = null;
     const build = (async () => {
@@ -457,22 +476,83 @@ async function flushLive() {
   } catch { /* tab is gone */ }
 }
 
-/* ---------------- download & preview ---------------- */
+/* ---------------- download ---------------- */
 
-async function downloadRecord(sid) {
-  if (!sid) return;
+/** Read a recording out of the DB, with whatever the live tab has not written yet. */
+async function readRecord(sid) {
   await flushLive();
   const session = await getSession(sid);
-  if (!session) return;
+  if (!session) throw new Error("Không thấy bản ghi");
   const [turns, frames] = await Promise.all([getTurns(sid), getFrames(sid)]);
-  const text = buildMarkdown(session, turns, frames);
-  const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const name = safeFileName(`${session.title || session.code}-${session.code}-${fileStamp(session.startedAt)}`);
+  return { session, turns, frames };
+}
+
+/** Used by the copy path when a recording is too big to paste; it reports the failure. */
+async function downloadRecord(sid) {
+  const { session, turns, frames } = await readRecord(sid);
+  return saveMarkdown(session, turns, frames);
+}
+
+/**
+ * The .zip: markdown plus the images as real files. Packing decodes every image out of
+ * base64, so a recording with fifty pictures takes a moment — the row shows how far it is.
+ */
+async function zipRecord(sid, rowEl) {
+  if (!sid || state.busy.has(sid)) return;
+  state.busy.add(sid);
+  const setStatus = statusSetter(rowEl);
+
   try {
-    await chrome.downloads.download({ url, filename: `${name}.md`, saveAs: false });
+    setStatus(progressBar(6) + "Đang đọc bản ghi…", "hprog");
+    const { session, turns, frames } = await readRecord(sid);
+
+    const res = await saveBundle(session, turns, frames, {
+      onProgress: ({ step, done, total }) => {
+        if (step !== "images" || !total) {
+          setStatus(progressBar(12) + "Đang dựng markdown…", "hprog");
+          return;
+        }
+        setStatus(
+          progressBar(12 + Math.round((done / total) * 88)) + `Đang gói ảnh ${done}/${total}`,
+          "hprog"
+        );
+      },
+    });
+
+    rowEl?.classList.add("hot");
+    setStatus(`✓ Đã tải .zip · ${res.frames} ảnh · ${bytes(res.size)}`, "hdone");
+    setTimeout(() => {
+      rowEl?.classList.remove("hot");
+      setStatus("", "");
+    }, 4000);
+  } catch (e) {
+    setStatus("Không tải được .zip: " + (e.message || e), "hfail");
   } finally {
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    state.busy.delete(sid);
+  }
+}
+
+/* Both download buttons on the current-meeting tab report on their own label — that tab
+   has no row to show progress in. */
+async function saveFromButton(sid, btn, kind) {
+  const old = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = kind === "zip" ? "Đang gói…" : "Đang dựng…";
+  try {
+    const { session, turns, frames } = await readRecord(sid);
+    const res =
+      kind === "zip"
+        ? await saveBundle(session, turns, frames, {
+            onProgress: ({ step, done, total }) => {
+              if (step === "images" && total) btn.textContent = `Ảnh ${done}/${total}`;
+            },
+          })
+        : await saveMarkdown(session, turns, frames);
+    btn.textContent = `✓ ${bytes(res.size)}`;
+  } catch {
+    btn.textContent = "Không tải được";
+  } finally {
+    setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 3000);
   }
 }
 

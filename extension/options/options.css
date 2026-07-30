@@ -99,6 +99,8 @@ a.recname {
 }
 a.recname:hover { border-bottom-color: var(--teal); color: var(--teal); }
 td .sub { display: block; font: 500 11.5px/1.4 var(--mono); color: var(--text-3); }
+/* .iconbtn is display:grid, so two of them in a cell need a flex row of their own. */
+td .acts { display: flex; gap: 6px; justify-content: flex-end; }
 
 .confirm {
   border: 1px solid color-mix(in srgb, var(--red) 32%, var(--line));

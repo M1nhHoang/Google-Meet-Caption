@@ -114,6 +114,11 @@ body {
   color: var(--text-2); font: 500 12px/1 var(--mono);
   display: grid; place-items: center; cursor: pointer; flex: none;
 }
+/* A word instead of a glyph — "zip" says what an arrow only hints at. */
+.iconbtn.wide {
+  width: auto; padding: 0 7px;
+  font: 600 10px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase;
+}
 .iconbtn:hover { border-color: var(--text-3); color: var(--text); }
 .iconbtn:focus-visible { outline: 2px solid var(--amber-bright); outline-offset: 1px; }
 .iconbtn.danger { color: var(--red); border-color: color-mix(in srgb, var(--red) 32%, var(--line)); }
